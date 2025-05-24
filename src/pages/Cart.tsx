@@ -31,7 +31,8 @@ const Cart = () => {
 
       console.log("🧾 Enviando a backend:", formattedItems);
 
-      const response = await fetch("http://localhost:3001/create_preference", {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/create_preference`, {
+
         method: "POST",
         headers: {
           "Content-Type": "application/json",
