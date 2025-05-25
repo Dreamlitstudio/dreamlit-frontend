@@ -5,51 +5,51 @@ import {
   Button,
   IconButton,
   Stack,
+  Image,
 } from "@chakra-ui/react";
-import { FaHome, FaListAlt, FaPenNib, FaInfoCircle, FaShoppingCart } from "react-icons/fa";
+import {
+  FaListAlt,
+  FaPenNib,
+  FaInfoCircle,
+  FaShoppingCart,
+} from "react-icons/fa";
 import { Link as RouterLink } from "react-router-dom";
+import logo from "../assets/logo.png"; // Asegúrate de que la ruta sea correcta
 
 const Navbar = () => {
   return (
-    <Box bg="teal.500" px={4}>
+    <Box bg="#225059" px={4}>
       <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
-        <Stack direction={"row"} spacing={7}>
-          <Button
-            as={RouterLink}
-            to="/"
-            leftIcon={<FaHome />}
-            colorScheme="teal"
-            variant="ghost"
-          >
-            Home
-          </Button>
+        <Stack direction={"row"} spacing={7} align="center">
+          <RouterLink to="/">
+            <Image
+              src={logo}
+              alt="Logo"
+              boxSize="40px"
+              _hover={{ transform: "scale(1.1)", transition: "0.2s" }}
+              cursor="pointer"
+            />
+          </RouterLink>
 
           <Button
             as={RouterLink}
             to="/catalog"
             leftIcon={<FaListAlt />}
-            colorScheme="teal"
             variant="ghost"
+            color="#9fe0ed"
+            _hover={{ bg: "rgba(255,255,255,0.2)", color: "white" }}
           >
             Productos
           </Button>
 
-          <Button
-            as={RouterLink}
-            to="/customize"
-            leftIcon={<FaPenNib />}
-            colorScheme="teal"
-            variant="ghost"
-          >
-            Personalización
-          </Button>
 
           <Button
             as={RouterLink}
             to="/about"
             leftIcon={<FaInfoCircle />}
-            colorScheme="teal"
             variant="ghost"
+            color="#9fe0ed"
+            _hover={{ bg: "rgba(255,255,255,0.2)", color: "white" }}
           >
             Nosotros
           </Button>
@@ -58,8 +58,9 @@ const Navbar = () => {
             as={RouterLink}
             to="/contact"
             leftIcon={<FaInfoCircle />}
-            colorScheme="teal"
             variant="ghost"
+            color="#9fe0ed"
+            _hover={{ bg: "rgba(255,255,255,0.2)", color: "white" }}
           >
             Contacto
           </Button>
@@ -68,8 +69,9 @@ const Navbar = () => {
         <IconButton
           aria-label="Carrito de Compras"
           icon={<FaShoppingCart />}
-          variant="solid"
-          colorScheme="teal"
+          variant="ghost"
+          color="#9fe0ed"
+          _hover={{ bg: "rgba(255,255,255,0.2)", color: "white" }}
           as={RouterLink}
           to="/cart"
         />

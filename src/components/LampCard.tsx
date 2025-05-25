@@ -4,39 +4,58 @@ import { useNavigate } from "react-router-dom";
 const LampCard = ({ lamp }: any) => {
   const navigate = useNavigate();
 
-  const handleCustomize = () => {
-    navigate("/customize", { state: { lamp } });
-  };
-
   return (
     <Box
       borderWidth="1px"
       borderRadius="lg"
       overflow="hidden"
       p="5"
-      boxShadow="lg"
-      _hover={{ boxShadow: "2xl" }}
+      bg="white"
+      boxShadow="md"
+      transition="all 0.2s"
+      _hover={{
+        boxShadow: "xl",
+        transform: "translateY(-4px)",
+      }}
     >
-      <Image src={lamp.imageUrl} alt={lamp.name} borderRadius="md" />
+      <Image
+        src={lamp.imageUrl}
+        alt={lamp.name}
+        borderRadius="md"
+        mx="auto"
+        objectFit="contain"
+        maxH="200px"
+      />
 
-      <VStack spacing={3} mt="4">
-        <Heading size="md">{lamp.name}</Heading>
-        <Text color="gray.500">
+      <VStack spacing={3} mt={4} align="start">
+        <Heading size="md" color="#225059">
+          {lamp.name}
+        </Heading>
+        <Text fontSize="sm" color="gray.600">
           {lamp.name === "León"
-            ? "Una lámpara que representa la valentía y el liderazgo, ideal para iluminar los sueños más audaces."
+            ? "Representa la valentía y el liderazgo, ideal para iluminar sueños audaces."
             : lamp.name === "Koala"
-            ? "Una lámpara que transmite serenidad y calma, perfecta para acompañar noches tranquilas."
+            ? "Transmite serenidad y calma, perfecta para noches tranquilas."
             : "El mejor amigo de los pequeños, brindando luz y compañía en cada sueño."}
         </Text>
-        <Text fontWeight="bold">${lamp.price}</Text>
+        <Text fontWeight="bold" color="#225059">
+          ${lamp.price}
+        </Text>
         <Button
-      colorScheme="teal"
-      onClick={() =>
-        navigate("/customize", { state: { lamp } }) // ✅ Pasar correctamente la lámpara
-      }
-    >
-      Personalizar
-    </Button>
+          color="#225059"
+          borderColor="#225059"
+          border="1px solid"
+          variant="outline"
+          _hover={{
+            bg: "#225059",
+            color: "white",
+          }}
+          onClick={() =>
+            navigate("/customize", { state: { lamp } })
+          }
+        >
+          Personalizar
+        </Button>
       </VStack>
     </Box>
   );

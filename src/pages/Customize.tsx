@@ -7,6 +7,7 @@ import {
   VStack,
   useToast,
   Text,
+  Heading,
 } from "@chakra-ui/react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
@@ -39,7 +40,7 @@ const Customize = () => {
   };
 
   const splitName = (name: string) => {
-    const words = name.split(" ");
+    const words = name.trim().split(" ");
     if (words.length > 1) {
       return [
         words.slice(0, Math.ceil(words.length / 2)).join(" "),
@@ -93,41 +94,65 @@ const Customize = () => {
   };
 
   return (
-    <VStack spacing={10} p={10}>
-      <Box position="relative">
+    <VStack spacing={8} px={4} py={8} maxW="lg" mx="auto">
+      <Heading color="#225059" size="lg" textAlign="center">
+        Personaliza tu lámpara
+      </Heading>
+
+      <Box position="relative" width="100%" maxW="400px">
         <Image
           src={lamp.imageUrl}
           alt={lamp.name}
-          boxSize="400px"
+          width="100%"
           objectFit="contain"
         />
         <svg
-          width="400"
-          height="400"
-          style={{ position: "absolute", top: 0, left: 0 }}
+          viewBox="0 0 400 400"
+          style={{ position: "absolute", top: 55, left: 0, width: "100%", height: "100%" }}
         >
-          {renderText.map((line, index) => (
-            <text
-              key={index}
-              x="50%"
-              y={renderText.length > 1 ? `${83 + index * 8}%` : "88%"}
-              textAnchor="middle"
-              fontSize="28"
-              fontFamily="NaishilaDancingScript"
-              fill="black"
-            >
-              {line}
-            </text>
-          ))}
+          {renderText.map((line, index) => {
+            const isMobile = window.matchMedia("(max-width: 480px)").matches;
+            const baseY = isMobile ? 310 : 320;
+            const lineSpacing = isMobile ? 30 : 40;
+            const fontSize = isMobile ? 30 : 39;
+
+            return (
+              <text
+                key={index}
+                x="200"
+                y={renderText.length > 1 ? baseY + index * lineSpacing : baseY + 20}
+                textAnchor="middle"
+                fontSize={fontSize}
+                fontFamily="NaishilaDancingScript"
+                fill="black"
+              >
+                {line}
+              </text>
+            );
+          })}
         </svg>
       </Box>
+
       <Input
         placeholder="Escribe un nombre"
         value={customName}
         onChange={handleInputChange}
         size="lg"
+        borderColor="#225059"
+        focusBorderColor="#9fe0ed"
+        maxW="400px"
+        width="100%"
       />
-      <Button colorScheme="teal" onClick={handleSave}>
+
+      <Button
+        bg="#225059"
+        color="#9fe0ed"
+        _hover={{ bg: "#1a3e45", color: "white" }}
+        size="lg"
+        onClick={handleSave}
+        width="100%"
+        maxW="300px"
+      >
         Guardar Personalización
       </Button>
     </VStack>
