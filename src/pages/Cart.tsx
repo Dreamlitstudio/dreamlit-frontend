@@ -9,12 +9,14 @@ import {
   VStack,
   Divider,
   useToast,
+  IconButton,
 } from "@chakra-ui/react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { FaTrash } from "react-icons/fa";
 
 const Cart = () => {
-  const { cart } = useCart();
+  const { cart, removeFromCart } = useCart();
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -31,7 +33,7 @@ const Cart = () => {
 
       console.log("🧾 Enviando a backend:", formattedItems);
 
-      const response = await fetch("https://dreamlit-backend.onrender.com/create_preference", {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/create_preference`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,27 +76,54 @@ const Cart = () => {
   }
 
   return (
-    <Box p="10">
-      <Heading size="lg" mb="5">
+    <Box p={{ base: 5, md: 10 }}>
+      <Heading size="lg" mb={5}>
         Carrito de Compras
       </Heading>
-      <VStack spacing="5" align="stretch">
+      <VStack spacing={5} align="stretch">
         {cart.map((item, index) => (
-          <HStack key={index} spacing="5">
-            <Image boxSize="100px" src={item.imageUrl} alt={item.name} />
-            <Stack flex="1">
-              <Text fontSize="xl">{item.name}</Text>
-              <Text fontSize="sm">Personalización: {item.customName}</Text>
+          <HStack
+            key={index}
+            spacing={5}
+            align="flex-start"
+            flexDir={{ base: "column", md: "row" }}
+            borderWidth="1px"
+            borderRadius="lg"
+            p={4}
+            bg="white"
+          >
+            <Image
+              src={item.imageUrl}
+              alt={item.name}
+              objectFit="contain"
+              maxW="120px"
+              maxH="120px"
+              borderRadius="md"
+            />
+            <Stack flex="1" spacing={1}>
+              <Text fontSize="xl" fontWeight="semibold">
+                {item.name}
+              </Text>
+              <Text fontSize="sm" color="gray.600">
+                Personalización: {item.customName}
+              </Text>
               <Text fontSize="md" fontWeight="bold">
-                $ {item.price} MXN
+                ${item.price} MXN
               </Text>
             </Stack>
+            <IconButton
+              icon={<FaTrash />}
+              aria-label="Eliminar producto"
+              colorScheme="red"
+              variant="outline"
+              onClick={() => removeFromCart(item.name)}
+            />
           </HStack>
         ))}
         <Divider />
         <Box textAlign="right">
           <Text fontSize="lg" fontWeight="bold" mb="4">
-            Total: $ {total} MXN
+            Total: ${total} MXN
           </Text>
           <Button colorScheme="teal" onClick={handlePayment}>
             Proceder al Pago
