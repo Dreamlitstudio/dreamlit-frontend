@@ -14,7 +14,7 @@ import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-  const { cart, clearCart } = useCart();
+  const { cart } = useCart();
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -31,14 +31,17 @@ const Cart = () => {
 
       console.log("🧾 Enviando a backend:", formattedItems);
 
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/create_preference`, {
-
+      const response = await fetch("https://dreamlit-backend.onrender.com/create_preference", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ items: formattedItems }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Error en la respuesta: ${response.status}`);
+      }
 
       const data = await response.json();
 
@@ -55,7 +58,7 @@ const Cart = () => {
         duration: 4000,
         isClosable: true,
       });
-      console.error(error);
+      console.error("❌ Error en el pago:", error);
     }
   };
 
@@ -93,14 +96,9 @@ const Cart = () => {
           <Text fontSize="lg" fontWeight="bold" mb="4">
             Total: $ {total} MXN
           </Text>
-          <HStack justify="flex-end" spacing="4">
-            <Button variant="outline" colorScheme="red" onClick={clearCart}>
-              Vaciar Carrito
-            </Button>
-            <Button colorScheme="teal" onClick={handlePayment}>
-              Proceder al Pago
-            </Button>
-          </HStack>
+          <Button colorScheme="teal" onClick={handlePayment}>
+            Proceder al Pago
+          </Button>
         </Box>
       </VStack>
     </Box>
