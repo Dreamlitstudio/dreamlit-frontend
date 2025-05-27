@@ -10,19 +10,33 @@ import {
   Divider,
   useToast,
   IconButton,
+  Input,
 } from "@chakra-ui/react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { FaTrash } from "react-icons/fa";
+import { useState } from "react";
 
 const Cart = () => {
   const { cart, removeFromCart } = useCart();
   const navigate = useNavigate();
   const toast = useToast();
+  const [email, setEmail] = useState("");
 
   const total = cart.reduce((acc, item) => acc + Number(item.price), 0);
 
   const handlePayment = async () => {
+    if (!email || !email.includes("@")) {
+      toast({
+        title: "Correo inválido",
+        description: "Por favor ingresa un correo válido.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
     try {
       const formattedItems = cart.map((item) => ({
         title: `${item.name} - ${item.customName}`,
@@ -31,14 +45,14 @@ const Cart = () => {
         currency_id: "MXN",
       }));
 
-      console.log("🧾 Enviando a backend:", formattedItems);
+      console.log("🧾 Enviando a backend:", formattedItems, email);
 
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/create_preference`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ items: formattedItems }),
+        body: JSON.stringify({ items: formattedItems, email }),
       });
 
       if (!response.ok) {
@@ -121,6 +135,16 @@ const Cart = () => {
           </HStack>
         ))}
         <Divider />
+        <Box>
+          <Text mb={2}>Correo electrónico para confirmación:</Text>
+          <Input
+            placeholder="tucorreo@ejemplo.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            bg="white"
+          />
+        </Box>
         <Box textAlign="right">
           <Text fontSize="lg" fontWeight="bold" mb="4">
             Total: ${total} MXN
