@@ -1,28 +1,28 @@
-import leonImage from "../assets/leon.png";
-import koalaImage from "../assets/koala.png";
-import perroImage from "../assets/perro.png";
+import zazaImage from "../assets/leon.png";
+import kikiImage from "../assets/koala.png";
+import nonoImage from "../assets/perro.png";
 
 const lamps = [
   {
     id: "1",
-    name: "León",
+    name: "Zaza",
     description: "Ideal para mesas de noche, escritorios y repisas. Personalización en acrílico para un toque único.",
     price: 1,
-    imageUrl: leonImage,
+    imageUrl: zazaImage,
   },
   {
     id: "2",
-    name: "Koala",
+    name: "Kiki",
     description: "Perfecto para espacios de juegos, estanterías y cuartos infantiles. Personalización en acrílico para un toque único.",
     price: 750,
-    imageUrl: koalaImage,
+    imageUrl: kikiImage,
   },
   {
     id: "3",
-    name: "Perro",
+    name: "Nono",
     description: "Genial para acompañar la mesita de noche, el estudio o el rincón de lectura. Personalización en acrílico para un toque único.",
     price: 750,
-    imageUrl: perroImage,
+    imageUrl: nonoImage,
   },
 ];
 
