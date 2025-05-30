@@ -12,7 +12,7 @@ const Footer = () => {
         align="center"
         textAlign={{ base: "center", md: "left" }}
       >
-        <Text fontSize="sm">Hecho con amor en México</Text>
+        <Text fontSize="sm">Hecho en México con amor</Text>
         <Link
           href="https://www.instagram.com/dream.lit.studio?igsh=dzBrY2Jwa2NjY3Fs"
           isExternal
