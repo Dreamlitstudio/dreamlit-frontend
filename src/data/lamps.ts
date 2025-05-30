@@ -7,7 +7,7 @@ const lamps = [
     id: "1",
     name: "Zaza",
     description: "Ideal para mesas de noche, escritorios y repisas. Personalización en acrílico para un toque único.",
-    price: 1,
+    price: 5,
     imageUrl: zazaImage,
   },
   {
