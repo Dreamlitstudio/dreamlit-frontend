@@ -62,6 +62,7 @@ const Cart = () => {
         quantity: 1,
         unit_price: Number(item.price),
         currency_id: "MXN",
+        image_url: item.imageUrl,
       }));
 
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/create_preference`, {
