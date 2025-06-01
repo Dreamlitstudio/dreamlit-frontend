@@ -55,9 +55,7 @@ const AdminPanel = () => {
         `${import.meta.env.VITE_BACKEND_URL}/orders/${index}/status`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: newStatus }),
         }
       );
@@ -87,29 +85,32 @@ const AdminPanel = () => {
   };
 
   useEffect(() => {
-    if (authenticated) fetchOrders();
+    if (authenticated) {
+      fetchOrders();
+    }
   }, [authenticated]);
 
   if (!authenticated) {
     return (
-      <Box p={8} textAlign="center">
-        <Heading mb={4}>Acceso de Administrador</Heading>
+      <Box p={8} maxW="md" mx="auto" textAlign="center">
+        <Heading mb={4}>Acceso restringido</Heading>
+        <Text mb={2}>Ingresa la contraseña de administrador</Text>
         <Input
-          placeholder="Ingresa la contraseña"
           type="password"
-          maxW="300px"
-          mx="auto"
-          mb={4}
+          placeholder="Contraseña"
           value={passwordInput}
           onChange={(e) => setPasswordInput(e.target.value)}
+          mb={3}
         />
         <Button
+          colorScheme="teal"
           onClick={() => {
             if (passwordInput === import.meta.env.VITE_ADMIN_PASSWORD) {
               setAuthenticated(true);
             } else {
               toast({
                 title: "Contraseña incorrecta",
+                description: "La contraseña ingresada no es válida.",
                 status: "error",
                 duration: 3000,
                 isClosable: true,
@@ -160,10 +161,11 @@ const AdminPanel = () => {
               </Td>
               <Td>
                 <Select
-                  value={order.status || "en produccion"}
+                  value={order.status || "pendiente"}
                   onChange={(e) => updateOrderStatus(index, e.target.value)}
                 >
-                  <option value="en produccion">En producción</option>
+                  <option value="pendiente">Pendiente</option>
+                  <option value="en producción">En producción</option>
                   <option value="enviado">Enviado</option>
                   <option value="recibido">Recibido</option>
                 </Select>
