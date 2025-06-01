@@ -21,7 +21,10 @@ const Cart = () => {
   const { cart, removeFromCart } = useCart();
   const navigate = useNavigate();
   const toast = useToast();
+
   const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
 
   const total = cart.reduce((acc, item) => acc + Number(item.price), 0);
 
@@ -37,22 +40,42 @@ const Cart = () => {
       return;
     }
 
+    if (!firstName || !lastName) {
+      toast({
+        title: "Faltan datos",
+        description: "Ingresa tu nombre y apellido.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
     try {
-      const formattedItems = cart.map((item) => ({
+      const external_reference = `order-${Date.now()}`;
+
+      const formattedItems = cart.map((item, index) => ({
+        id: `lamp-${index}`,
         title: `${item.name} - ${item.customName}`,
+        description: `Lámpara personalizada con el nombre "${item.customName}"`,
+        category_id: "home_decor",
         quantity: 1,
         unit_price: Number(item.price),
         currency_id: "MXN",
       }));
-
-      console.log("🧾 Enviando a backend:", formattedItems, email);
 
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/create_preference`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ items: formattedItems, email }),
+        body: JSON.stringify({
+          items: formattedItems,
+          email,
+          external_reference,
+          first_name: firstName,
+          last_name: lastName,
+        }),
       });
 
       if (!response.ok) {
@@ -134,8 +157,25 @@ const Cart = () => {
             />
           </HStack>
         ))}
+
         <Divider />
+
         <Box>
+          <Text mb={2}>Nombre del comprador:</Text>
+          <Input
+            placeholder="Nombre"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            bg="white"
+            mb={2}
+          />
+          <Input
+            placeholder="Apellido"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            bg="white"
+            mb={4}
+          />
           <Text mb={2}>Correo electrónico para confirmación:</Text>
           <Input
             placeholder="tucorreo@ejemplo.com"
@@ -145,6 +185,7 @@ const Cart = () => {
             bg="white"
           />
         </Box>
+
         <Box textAlign="right">
           <Text fontSize="lg" fontWeight="bold" mb="4">
             Total: ${total} MXN
