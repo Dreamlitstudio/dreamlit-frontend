@@ -1,4 +1,3 @@
-// src/App.tsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
@@ -7,6 +6,7 @@ import Customize from "./pages/Customize";
 import Cart from "./pages/Cart";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import AdminPanel from "./pages/AdminPanel"; // 🆕 Importa el panel de admin
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
@@ -35,6 +35,7 @@ const App = () => {
             <Route path="/cart" element={<Cart />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/admin" element={<AdminPanel />} /> {/* 🆕 Ruta de administrador */}
           </Routes>
         </main>
         <Footer />
