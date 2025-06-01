@@ -12,6 +12,8 @@ import {
   VStack,
   Spinner,
   useToast,
+  Input,
+  Button,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
@@ -25,6 +27,8 @@ interface Order {
 const AdminPanel = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
   const toast = useToast();
 
   const fetchOrders = async () => {
@@ -47,13 +51,16 @@ const AdminPanel = () => {
 
   const updateOrderStatus = async (index: number, newStatus: string) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/orders/update`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ index, status: newStatus }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/orders/${index}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
 
       if (!response.ok) throw new Error();
 
@@ -80,8 +87,41 @@ const AdminPanel = () => {
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    if (authenticated) fetchOrders();
+  }, [authenticated]);
+
+  if (!authenticated) {
+    return (
+      <Box p={8} textAlign="center">
+        <Heading mb={4}>Acceso de Administrador</Heading>
+        <Input
+          placeholder="Ingresa la contraseña"
+          type="password"
+          maxW="300px"
+          mx="auto"
+          mb={4}
+          value={passwordInput}
+          onChange={(e) => setPasswordInput(e.target.value)}
+        />
+        <Button
+          onClick={() => {
+            if (passwordInput === import.meta.env.VITE_ADMIN_PASSWORD) {
+              setAuthenticated(true);
+            } else {
+              toast({
+                title: "Contraseña incorrecta",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+              });
+            }
+          }}
+        >
+          Entrar
+        </Button>
+      </Box>
+    );
+  }
 
   if (loading) {
     return (
