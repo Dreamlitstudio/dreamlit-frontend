@@ -11,9 +11,9 @@ import {
   Text,
   VStack,
   Spinner,
-  useToast,
   Input,
   Button,
+  useToast,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
@@ -31,9 +31,12 @@ const AdminPanel = () => {
   const [passwordInput, setPasswordInput] = useState("");
   const toast = useToast();
 
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "";
+  const passwordEnv = process.env.REACT_APP_ADMIN_PASSWORD || "";
+
   const fetchOrders = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/orders`);
+      const response = await fetch(`${BACKEND_URL}/orders`);
       const data = await response.json();
       setOrders(data);
     } catch (error) {
@@ -51,14 +54,13 @@ const AdminPanel = () => {
 
   const updateOrderStatus = async (index: number, newStatus: string) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/orders/${index}/status`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: newStatus }),
-        }
-      );
+      const response = await fetch(`${BACKEND_URL}/orders/${index}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
 
       if (!response.ok) throw new Error();
 
@@ -85,32 +87,28 @@ const AdminPanel = () => {
   };
 
   useEffect(() => {
-    if (authenticated) {
-      fetchOrders();
-    }
+    if (authenticated) fetchOrders();
   }, [authenticated]);
 
   if (!authenticated) {
     return (
-      <Box p={8} maxW="md" mx="auto" textAlign="center">
+      <Box p={8} textAlign="center">
         <Heading mb={4}>Acceso restringido</Heading>
-        <Text mb={2}>Ingresa la contraseña de administrador</Text>
         <Input
           type="password"
-          placeholder="Contraseña"
+          placeholder="Contraseña de administrador"
           value={passwordInput}
           onChange={(e) => setPasswordInput(e.target.value)}
-          mb={3}
+          mb={4}
         />
         <Button
-          colorScheme="teal"
+          colorScheme="blue"
           onClick={() => {
-            if (passwordInput === import.meta.env.VITE_ADMIN_PASSWORD) {
+            if (passwordInput === passwordEnv) {
               setAuthenticated(true);
             } else {
               toast({
                 title: "Contraseña incorrecta",
-                description: "La contraseña ingresada no es válida.",
                 status: "error",
                 duration: 3000,
                 isClosable: true,
@@ -161,11 +159,10 @@ const AdminPanel = () => {
               </Td>
               <Td>
                 <Select
-                  value={order.status || "pendiente"}
+                  value={order.status || "en produccion"}
                   onChange={(e) => updateOrderStatus(index, e.target.value)}
                 >
-                  <option value="pendiente">Pendiente</option>
-                  <option value="en producción">En producción</option>
+                  <option value="en produccion">En producción</option>
                   <option value="enviado">Enviado</option>
                   <option value="recibido">Recibido</option>
                 </Select>
