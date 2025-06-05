@@ -49,7 +49,7 @@ const Catalog = () => {
       {filteredLamps.length > 0 ? (
         <Grid
           templateColumns={`repeat(${columns}, 1fr)`}
-          gap={6}
+          gap={10} // ⬅️ Aumentamos el espacio entre tarjetas
           mt={2}
           mb={12}
           px={2}
