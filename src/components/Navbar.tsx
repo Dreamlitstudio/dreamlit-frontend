@@ -10,6 +10,8 @@ import {
   Collapse,
 } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
+import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
+
 import logo from "../assets/logo.png";
 
 // Íconos personalizados
@@ -40,18 +42,18 @@ const Navbar = () => {
           />
         </RouterLink>
 
-        {/* Icono menú responsive */}
+        {/* Botón hamburguesa en móviles */}
         <IconButton
           display={{ base: "flex", md: "none" }}
           onClick={onToggle}
-          icon={<Image src={isOpen ? iconCart : iconBox} boxSize="24px" />}
+          icon={isOpen ? <CloseIcon boxSize={5} /> : <HamburgerIcon boxSize={6} />}
           variant="ghost"
-          aria-label="Toggle Navigation"
+          aria-label="Abrir menú"
           color="#9fe0ed"
           _hover={{ bg: "rgba(255,255,255,0.2)" }}
         />
 
-        {/* Links en escritorio */}
+        {/* Links escritorio */}
         <Flex display={{ base: "none", md: "flex" }} alignItems="center">
           <Stack direction="row" spacing={4}>
             <Button
@@ -97,7 +99,7 @@ const Navbar = () => {
         </Flex>
       </Flex>
 
-      {/* Links en móviles */}
+      {/* Links móviles */}
       <Collapse in={isOpen} animateOpacity>
         <Stack mt={4} spacing={4} pb={4} display={{ md: "none" }}>
           <Button
