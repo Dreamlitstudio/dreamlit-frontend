@@ -14,8 +14,16 @@ import {
   Input,
   Button,
   useToast,
+  IconButton,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { DeleteIcon } from "@chakra-ui/icons";
 
 interface Order {
   id: string;
@@ -33,6 +41,8 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const cancelRef = useRef(null);
   const toast = useToast();
 
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "";
@@ -44,51 +54,34 @@ const AdminPanel = () => {
       const data = await response.json();
       setOrders(data);
     } catch {
-      toast({
-        title: "Error",
-        description: "No se pudieron cargar las órdenes.",
-        status: "error",
-        duration: 4000,
-        isClosable: true,
-      });
+      toast({ title: "Error", description: "No se pudieron cargar las órdenes.", status: "error" });
     } finally {
       setLoading(false);
     }
   };
 
   const updateOrderStatus = async (id: string, newStatus: string) => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/orders/${id}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) throw new Error();
-
-      const updated = orders.map((order) =>
-        order.id === id ? { ...order, status: newStatus } : order
+    const res = await fetch(`${BACKEND_URL}/orders/${id}/status`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    if (res.ok) {
+      setOrders((prev) =>
+        prev.map((o) => (o.id === id ? { ...o, status: newStatus } : o))
       );
-      setOrders(updated);
-
-      toast({
-        title: "Estado actualizado",
-        description: "La orden se actualizó correctamente.",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch {
-      toast({
-        title: "Error",
-        description: "No se pudo actualizar el estado.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
+      toast({ title: "Actualizado", status: "success" });
     }
+  };
+
+  const deleteOrder = async () => {
+    if (!deleteId) return;
+    const res = await fetch(`${BACKEND_URL}/orders/${deleteId}`, { method: "DELETE" });
+    if (res.ok) {
+      setOrders((prev) => prev.filter((o) => o.id !== deleteId));
+      toast({ title: "Orden eliminada", status: "info" });
+    }
+    setDeleteId(null);
   };
 
   useEffect(() => {
@@ -106,21 +99,7 @@ const AdminPanel = () => {
           onChange={(e) => setPasswordInput(e.target.value)}
           mb={4}
         />
-        <Button
-          colorScheme="blue"
-          onClick={() => {
-            if (passwordInput === ADMIN_PASSWORD) {
-              setAuthenticated(true);
-            } else {
-              toast({
-                title: "Contraseña incorrecta",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-              });
-            }
-          }}
-        >
+        <Button onClick={() => setAuthenticated(passwordInput === ADMIN_PASSWORD)}>
           Entrar
         </Button>
       </Box>
@@ -144,8 +123,10 @@ const AdminPanel = () => {
           <Tr>
             <Th>Fecha</Th>
             <Th>Email</Th>
+            <Th>Nombre</Th>
             <Th>Productos</Th>
             <Th>Estado</Th>
+            <Th></Th>
           </Tr>
         </Thead>
         <Tbody>
@@ -153,6 +134,7 @@ const AdminPanel = () => {
             <Tr key={order.id}>
               <Td>{new Date(order.created_at).toLocaleDateString()}</Td>
               <Td>{order.buyer_email}</Td>
+              <Td>{order.first_name} {order.last_name}</Td>
               <Td>
                 <VStack align="start">
                   {order.items.map((item, i) => (
@@ -173,10 +155,43 @@ const AdminPanel = () => {
                   <option value="recibido">Recibido</option>
                 </Select>
               </Td>
+              <Td>
+                <IconButton
+                  icon={<DeleteIcon />}
+                  aria-label="Eliminar orden"
+                  onClick={() => setDeleteId(order.id)}
+                  size="sm"
+                  colorScheme="red"
+                />
+              </Td>
             </Tr>
           ))}
         </Tbody>
       </Table>
+
+      {/* Popup de confirmación */}
+      <AlertDialog
+        isOpen={!!deleteId}
+        leastDestructiveRef={cancelRef}
+        onClose={() => setDeleteId(null)}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader>¿Eliminar orden?</AlertDialogHeader>
+            <AlertDialogBody>
+              Esta acción no se puede deshacer.
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={() => setDeleteId(null)}>
+                Cancelar
+              </Button>
+              <Button colorScheme="red" onClick={deleteOrder} ml={3}>
+                Eliminar
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Box>
   );
 };
