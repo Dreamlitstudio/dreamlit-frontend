@@ -18,10 +18,14 @@ import {
 import { useEffect, useState } from "react";
 
 interface Order {
+  id: string;
+  buyer_email: string;
+  first_name: string;
+  last_name: string;
+  external_reference: string;
+  status: string;
   items: { title: string; unit_price: number }[];
-  buyerEmail: string;
-  status?: string;
-  date?: string;
+  created_at: string;
 }
 
 const AdminPanel = () => {
@@ -32,14 +36,14 @@ const AdminPanel = () => {
   const toast = useToast();
 
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "";
-  const passwordEnv = process.env.REACT_APP_ADMIN_PASSWORD || "";
+  const ADMIN_PASSWORD = process.env.REACT_APP_ADMIN_PASSWORD || "";
 
   const fetchOrders = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/orders`);
       const data = await response.json();
       setOrders(data);
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "No se pudieron cargar las órdenes.",
@@ -52,9 +56,9 @@ const AdminPanel = () => {
     }
   };
 
-  const updateOrderStatus = async (index: number, newStatus: string) => {
+  const updateOrderStatus = async (id: string, newStatus: string) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/orders/${index}/status`, {
+      const response = await fetch(`${BACKEND_URL}/orders/${id}/status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -64,8 +68,9 @@ const AdminPanel = () => {
 
       if (!response.ok) throw new Error();
 
-      const updated = [...orders];
-      updated[index].status = newStatus;
+      const updated = orders.map((order) =>
+        order.id === id ? { ...order, status: newStatus } : order
+      );
       setOrders(updated);
 
       toast({
@@ -104,7 +109,7 @@ const AdminPanel = () => {
         <Button
           colorScheme="blue"
           onClick={() => {
-            if (passwordInput === passwordEnv) {
+            if (passwordInput === ADMIN_PASSWORD) {
               setAuthenticated(true);
             } else {
               toast({
@@ -144,10 +149,10 @@ const AdminPanel = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {orders.map((order, index) => (
-            <Tr key={index}>
-              <Td>{new Date(order.date || "").toLocaleDateString()}</Td>
-              <Td>{order.buyerEmail}</Td>
+          {orders.map((order) => (
+            <Tr key={order.id}>
+              <Td>{new Date(order.created_at).toLocaleDateString()}</Td>
+              <Td>{order.buyer_email}</Td>
               <Td>
                 <VStack align="start">
                   {order.items.map((item, i) => (
@@ -159,10 +164,11 @@ const AdminPanel = () => {
               </Td>
               <Td>
                 <Select
-                  value={order.status || "en produccion"}
-                  onChange={(e) => updateOrderStatus(index, e.target.value)}
+                  value={order.status}
+                  onChange={(e) => updateOrderStatus(order.id, e.target.value)}
                 >
-                  <option value="en produccion">En producción</option>
+                  <option value="pendiente">Pendiente</option>
+                  <option value="en producción">En producción</option>
                   <option value="enviado">Enviado</option>
                   <option value="recibido">Recibido</option>
                 </Select>
