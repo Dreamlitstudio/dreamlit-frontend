@@ -32,7 +32,7 @@ interface Order {
   last_name: string;
   external_reference: string;
   status: string;
-  items: { title: string; unit_price: number }[];
+  items: any; // podría ser string o array
   created_at: string;
 }
 
@@ -54,7 +54,11 @@ const AdminPanel = () => {
       const data = await response.json();
       setOrders(data);
     } catch {
-      toast({ title: "Error", description: "No se pudieron cargar las órdenes.", status: "error" });
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las órdenes.",
+        status: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -76,7 +80,9 @@ const AdminPanel = () => {
 
   const deleteOrder = async () => {
     if (!deleteId) return;
-    const res = await fetch(`${BACKEND_URL}/orders/${deleteId}`, { method: "DELETE" });
+    const res = await fetch(`${BACKEND_URL}/orders/${deleteId}`, {
+      method: "DELETE",
+    });
     if (res.ok) {
       setOrders((prev) => prev.filter((o) => o.id !== deleteId));
       toast({ title: "Orden eliminada", status: "info" });
@@ -130,46 +136,57 @@ const AdminPanel = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {orders.map((order) => (
-            <Tr key={order.id}>
-              <Td>{new Date(order.created_at).toLocaleDateString()}</Td>
-              <Td>{order.buyer_email}</Td>
-              <Td>{order.first_name} {order.last_name}</Td>
-              <Td>
-                <VStack align="start">
-                  {order.items.map((item, i) => (
-                    <Text key={i}>
-                      {item.title} - ${item.unit_price} MXN
-                    </Text>
-                  ))}
-                </VStack>
-              </Td>
-              <Td>
-                <Select
-                  value={order.status}
-                  onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                >
-                  <option value="pendiente">Pendiente</option>
-                  <option value="en producción">En producción</option>
-                  <option value="enviado">Enviado</option>
-                  <option value="recibido">Recibido</option>
-                </Select>
-              </Td>
-              <Td>
-                <IconButton
-                  icon={<DeleteIcon />}
-                  aria-label="Eliminar orden"
-                  onClick={() => setDeleteId(order.id)}
-                  size="sm"
-                  colorScheme="red"
-                />
-              </Td>
-            </Tr>
-          ))}
+          {orders.map((order) => {
+            let itemsArray;
+            try {
+              itemsArray =
+                typeof order.items === "string"
+                  ? JSON.parse(order.items)
+                  : order.items;
+            } catch {
+              itemsArray = [];
+            }
+
+            return (
+              <Tr key={order.id}>
+                <Td>{new Date(order.created_at).toLocaleDateString()}</Td>
+                <Td>{order.buyer_email}</Td>
+                <Td>{order.first_name} {order.last_name}</Td>
+                <Td>
+                  <VStack align="start">
+                    {itemsArray?.map((item: any, i: number) => (
+                      <Text key={i}>
+                        {item.title} - ${item.unit_price} MXN
+                      </Text>
+                    ))}
+                  </VStack>
+                </Td>
+                <Td>
+                  <Select
+                    value={order.status}
+                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                  >
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en producción">En producción</option>
+                    <option value="enviado">Enviado</option>
+                    <option value="recibido">Recibido</option>
+                  </Select>
+                </Td>
+                <Td>
+                  <IconButton
+                    icon={<DeleteIcon />}
+                    aria-label="Eliminar orden"
+                    onClick={() => setDeleteId(order.id)}
+                    size="sm"
+                    colorScheme="red"
+                  />
+                </Td>
+              </Tr>
+            );
+          })}
         </Tbody>
       </Table>
 
-      {/* Popup de confirmación */}
       <AlertDialog
         isOpen={!!deleteId}
         leastDestructiveRef={cancelRef}
@@ -178,9 +195,7 @@ const AdminPanel = () => {
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader>¿Eliminar orden?</AlertDialogHeader>
-            <AlertDialogBody>
-              Esta acción no se puede deshacer.
-            </AlertDialogBody>
+            <AlertDialogBody>Esta acción no se puede deshacer.</AlertDialogBody>
             <AlertDialogFooter>
               <Button ref={cancelRef} onClick={() => setDeleteId(null)}>
                 Cancelar
