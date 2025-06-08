@@ -32,7 +32,7 @@ interface Order {
   last_name: string;
   external_reference: string;
   status: string;
-  items: any; // podría ser string o array
+  items: any; // puede ser string (JSON) o array
   created_at: string;
 }
 
@@ -58,6 +58,8 @@ const AdminPanel = () => {
         title: "Error",
         description: "No se pudieron cargar las órdenes.",
         status: "error",
+        duration: 3000,
+        isClosable: true,
       });
     } finally {
       setLoading(false);
@@ -74,7 +76,7 @@ const AdminPanel = () => {
       setOrders((prev) =>
         prev.map((o) => (o.id === id ? { ...o, status: newStatus } : o))
       );
-      toast({ title: "Actualizado", status: "success" });
+      toast({ title: "Estado actualizado", status: "success" });
     }
   };
 
@@ -105,7 +107,20 @@ const AdminPanel = () => {
           onChange={(e) => setPasswordInput(e.target.value)}
           mb={4}
         />
-        <Button onClick={() => setAuthenticated(passwordInput === ADMIN_PASSWORD)}>
+        <Button
+          onClick={() => {
+            if (passwordInput === ADMIN_PASSWORD) {
+              setAuthenticated(true);
+            } else {
+              toast({
+                title: "Contraseña incorrecta",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+              });
+            }
+          }}
+        >
           Entrar
         </Button>
       </Box>
@@ -137,13 +152,14 @@ const AdminPanel = () => {
         </Thead>
         <Tbody>
           {orders.map((order) => {
-            let itemsArray;
+            let itemsArray = [];
+
             try {
               itemsArray =
                 typeof order.items === "string"
                   ? JSON.parse(order.items)
                   : order.items;
-            } catch {
+            } catch (e) {
               itemsArray = [];
             }
 
@@ -151,20 +167,28 @@ const AdminPanel = () => {
               <Tr key={order.id}>
                 <Td>{new Date(order.created_at).toLocaleDateString()}</Td>
                 <Td>{order.buyer_email}</Td>
-                <Td>{order.first_name} {order.last_name}</Td>
+                <Td>
+                  {order.first_name} {order.last_name}
+                </Td>
                 <Td>
                   <VStack align="start">
-                    {itemsArray?.map((item: any, i: number) => (
-                      <Text key={i}>
-                        {item.title} - ${item.unit_price} MXN
-                      </Text>
-                    ))}
+                    {Array.isArray(itemsArray) && itemsArray.length > 0 ? (
+                      itemsArray.map((item: any, i: number) => (
+                        <Text key={i}>
+                          {item.title} - ${item.unit_price} MXN
+                        </Text>
+                      ))
+                    ) : (
+                      <Text color="red.500">⚠️ No se pudieron mostrar productos</Text>
+                    )}
                   </VStack>
                 </Td>
                 <Td>
                   <Select
                     value={order.status}
-                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                    onChange={(e) =>
+                      updateOrderStatus(order.id, e.target.value)
+                    }
                   >
                     <option value="pendiente">Pendiente</option>
                     <option value="en producción">En producción</option>
@@ -194,8 +218,14 @@ const AdminPanel = () => {
       >
         <AlertDialogOverlay>
           <AlertDialogContent>
-            <AlertDialogHeader>¿Eliminar orden?</AlertDialogHeader>
-            <AlertDialogBody>Esta acción no se puede deshacer.</AlertDialogBody>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              ¿Eliminar orden?
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Esta acción no se puede deshacer.
+            </AlertDialogBody>
+
             <AlertDialogFooter>
               <Button ref={cancelRef} onClick={() => setDeleteId(null)}>
                 Cancelar
