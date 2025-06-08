@@ -32,7 +32,7 @@ interface Order {
   last_name: string;
   external_reference: string;
   status: string;
-  items: any; // puede ser string (JSON) o array
+  items: any;
   created_at: string;
 }
 
@@ -152,14 +152,16 @@ const AdminPanel = () => {
         </Thead>
         <Tbody>
           {orders.map((order) => {
-            let itemsArray = [];
+            let itemsArray: any[] = [];
 
             try {
-              itemsArray =
-                typeof order.items === "string"
-                  ? JSON.parse(order.items)
-                  : order.items;
-            } catch (e) {
+              if (typeof order.items === "string") {
+                const parsed = JSON.parse(order.items);
+                itemsArray = Array.isArray(parsed) ? parsed : [];
+              } else if (Array.isArray(order.items)) {
+                itemsArray = order.items;
+              }
+            } catch {
               itemsArray = [];
             }
 
@@ -186,9 +188,7 @@ const AdminPanel = () => {
                 <Td>
                   <Select
                     value={order.status}
-                    onChange={(e) =>
-                      updateOrderStatus(order.id, e.target.value)
-                    }
+                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
                   >
                     <option value="pendiente">Pendiente</option>
                     <option value="en producción">En producción</option>
