@@ -32,7 +32,7 @@ interface Order {
   last_name: string;
   external_reference: string;
   status: string;
-  items: any;
+  items: any; // puede ser string (JSON) o array
   created_at: string;
 }
 
@@ -155,13 +155,14 @@ const AdminPanel = () => {
             let itemsArray: any[] = [];
 
             try {
-              if (typeof order.items === "string") {
-                const parsed = JSON.parse(order.items);
+              const raw = order.items;
+              if (typeof raw === "string") {
+                const parsed = JSON.parse(raw);
                 itemsArray = Array.isArray(parsed) ? parsed : [];
-              } else if (Array.isArray(order.items)) {
-                itemsArray = order.items;
+              } else if (Array.isArray(raw)) {
+                itemsArray = raw;
               }
-            } catch {
+            } catch (e) {
               itemsArray = [];
             }
 
@@ -169,12 +170,10 @@ const AdminPanel = () => {
               <Tr key={order.id}>
                 <Td>{new Date(order.created_at).toLocaleDateString()}</Td>
                 <Td>{order.buyer_email}</Td>
-                <Td>
-                  {order.first_name} {order.last_name}
-                </Td>
+                <Td>{order.first_name} {order.last_name}</Td>
                 <Td>
                   <VStack align="start">
-                    {Array.isArray(itemsArray) && itemsArray.length > 0 ? (
+                    {itemsArray.length > 0 ? (
                       itemsArray.map((item: any, i: number) => (
                         <Text key={i}>
                           {item.title} - ${item.unit_price} MXN
@@ -188,7 +187,9 @@ const AdminPanel = () => {
                 <Td>
                   <Select
                     value={order.status}
-                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                    onChange={(e) =>
+                      updateOrderStatus(order.id, e.target.value)
+                    }
                   >
                     <option value="pendiente">Pendiente</option>
                     <option value="en producción">En producción</option>
