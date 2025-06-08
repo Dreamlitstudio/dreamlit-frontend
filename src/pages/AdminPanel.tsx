@@ -32,7 +32,7 @@ interface Order {
   last_name: string;
   external_reference: string;
   status: string;
-  items: any; // puede ser string (JSON) o array
+  items: any;
   created_at: string;
 }
 
@@ -52,7 +52,8 @@ const AdminPanel = () => {
     try {
       const response = await fetch(`${BACKEND_URL}/orders`);
       const data = await response.json();
-      setOrders(data);
+      console.log("🛠️ Órdenes recibidas:", data);
+      setOrders(Array.isArray(data) ? data : []);
     } catch {
       toast({
         title: "Error",
