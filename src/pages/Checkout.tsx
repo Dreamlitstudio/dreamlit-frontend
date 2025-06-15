@@ -19,12 +19,11 @@ const Checkout = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
 
   const [address, setAddress] = useState<Address>({
-    fullName: "",
     street: "",
     number: "",
     neighborhood: "",
@@ -43,32 +42,25 @@ const Checkout = () => {
   const total = cart.reduce((acc, item) => acc + item.price, 0);
 
   const handlePayment = async () => {
-    if (!email || !email.includes("@")) {
-      toast({
-        title: "Correo inválido",
-        description: "Por favor ingresa un correo válido.",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    if (!firstName || !lastName) {
-      toast({
-        title: "Nombre incompleto",
-        description: "Por favor ingresa nombre y apellido.",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    if (!address.fullName || !address.street || !address.number || !address.postalCode || !address.city || !address.state || !address.phone) {
+    // Validación básica
+    if (!firstName || !lastName || !email || !email.includes("@")) {
       toast({
         title: "Datos incompletos",
-        description: "Por favor completa todos los campos requeridos.",
+        description: "Por favor ingresa tu nombre, apellido y un correo válido.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (
+      !address.street || !address.number || !address.postalCode ||
+      !address.city || !address.state || !address.phone
+    ) {
+      toast({
+        title: "Dirección incompleta",
+        description: "Por favor completa todos los campos de envío.",
         status: "warning",
         duration: 3000,
         isClosable: true,
@@ -96,11 +88,11 @@ const Checkout = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: formattedItems,
-          address,
           external_reference,
           email,
           first_name: firstName,
-          last_name: lastName
+          last_name: lastName,
+          address,
         }),
       });
 
@@ -141,13 +133,9 @@ const Checkout = () => {
   return (
     <Box p={{ base: 5, md: 10 }}>
       <Heading size="lg" mb={5}>
-        Datos de envío
+        Datos de Compra y Envío
       </Heading>
       <VStack spacing={4} align="stretch">
-        <FormControl isRequired>
-          <FormLabel>Email</FormLabel>
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        </FormControl>
 
         <FormControl isRequired>
           <FormLabel>Nombre</FormLabel>
@@ -160,8 +148,8 @@ const Checkout = () => {
         </FormControl>
 
         <FormControl isRequired>
-          <FormLabel>Nombre completo para envío</FormLabel>
-          <Input name="fullName" value={address.fullName} onChange={handleAddressChange} />
+          <FormLabel>Correo electrónico</FormLabel>
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         </FormControl>
 
         <FormControl isRequired>
@@ -204,6 +192,7 @@ const Checkout = () => {
         <Button colorScheme="teal" onClick={handlePayment}>
           Proceder al Pago
         </Button>
+
       </VStack>
     </Box>
   );
