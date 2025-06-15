@@ -1,128 +1,168 @@
 import {
   Box,
+  Button,
   Heading,
   VStack,
-  Input,
-  Button,
   Text,
+  Input,
+  FormControl,
+  FormLabel,
   useToast,
 } from "@chakra-ui/react";
 import { useCart } from "../context/CartContext";
-import { useOrder } from "../context/OrderContext";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { Address } from "../types/Address";
 
 const Checkout = () => {
   const { cart, clearCart } = useCart();
-  const { addOrder } = useOrder();
   const navigate = useNavigate();
   const toast = useToast();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    address: "",
+
+  const [address, setAddress] = useState<Address>({
+    fullName: "",
+    street: "",
+    number: "",
+    neighborhood: "",
+    postalCode: "",
+    city: "",
+    state: "",
+    country: "México",
     phone: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm((prevForm) => ({ ...prevForm, [name]: value }));
+    setAddress((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
-    if (
-      !form.name.trim() ||
-      !form.email.trim() ||
-      !form.address.trim() ||
-      !form.phone.trim()
-    ) {
+  const total = cart.reduce((acc, item) => acc + item.price, 0);
+
+  const handlePayment = async () => {
+    // Validación básica
+    if (!address.fullName || !address.street || !address.number || !address.postalCode || !address.city || !address.state || !address.phone) {
       toast({
-        title: "Error",
-        description: "Todos los campos son obligatorios",
-        status: "error",
+        title: "Datos incompletos",
+        description: "Por favor completa todos los campos requeridos.",
+        status: "warning",
         duration: 3000,
         isClosable: true,
       });
       return;
     }
 
-    const newOrder = {
-      id: uuidv4(),
-      items: cart.map((item) => ({
-        name: item.name,
-        customName: item.customName,
-        imageUrl: item.imageUrl,
-        price: Number(item.price), // ✅ Aseguramos que sea un número
-      })),
-    };
+    try {
+      const external_reference = `order-${Date.now()}`;
 
-    console.log("Nueva Orden Generada: ", newOrder); // ✅ Debug para revisar el objeto
+      const formattedItems = cart.map((item, index) => ({
+        id: `lamp-${index}`,
+        title: `${item.name} - ${item.customName}`,
+        description: `Lámpara personalizada con el nombre "${item.customName}", Envío: ${item.shippingType}`,
+        category_id: "home_decor",
+        quantity: 1,
+        unit_price: item.price,
+        currency_id: "MXN",
+        image_url: item.imageUrl,
+        shipping_type: item.shippingType,
+      }));
 
-    // Validación adicional
-    if (!newOrder.items || newOrder.items.length === 0) {
-      console.error("Error: La orden no contiene productos.");
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/create_preference`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: formattedItems,
+          address,
+          external_reference,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error en la respuesta: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        throw new Error("No se recibió un punto de inicio de pago.");
+      }
+    } catch (error) {
       toast({
         title: "Error",
-        description: "No se encontraron productos en el pedido.",
+        description: "Hubo un problema al iniciar el pago. Intenta nuevamente.",
         status: "error",
-        duration: 5000,
+        duration: 4000,
         isClosable: true,
       });
-      return;
+      console.error("❌ Error en el pago:", error);
     }
-
-    // Guardamos el pedido en el contexto
-    addOrder(newOrder);
-    clearCart();
-
-    toast({
-      title: "¡Compra realizada!",
-      description: "Te contactaremos para acordar el envío.",
-      status: "success",
-      duration: 5000,
-      isClosable: true,
-    });
-
-    console.log("Navegando a Order History..."); // ✅ Debug para saber si llega hasta aquí
-    navigate("/order-history");
   };
 
-  return (
-    <Box p="10">
-      <VStack spacing={5} align="start">
-        <Heading size="lg">Finalizar Compra</Heading>
-
-        <Input
-          placeholder="Nombre Completo"
-          value={form.name}
-          onChange={handleInputChange}
-          name="name"
-        />
-        <Input
-          placeholder="Correo Electrónico"
-          value={form.email}
-          onChange={handleInputChange}
-          name="email"
-          type="email"
-        />
-        <Input
-          placeholder="Dirección"
-          value={form.address}
-          onChange={handleInputChange}
-          name="address"
-        />
-        <Input
-          placeholder="Teléfono"
-          value={form.phone}
-          onChange={handleInputChange}
-          name="phone"
-          type="tel"
-        />
-
-        <Button colorScheme="teal" onClick={handleSubmit}>
-          Confirmar Pedido
+  if (cart.length === 0) {
+    return (
+      <Box p="10" textAlign="center">
+        <Heading size="md">No hay productos en el carrito</Heading>
+        <Button mt="5" onClick={() => navigate("/catalog")}>
+          Volver al catálogo
         </Button>
+      </Box>
+    );
+  }
+
+  return (
+    <Box p={{ base: 5, md: 10 }}>
+      <Heading size="lg" mb={5}>
+        Datos de envío
+      </Heading>
+      <VStack spacing={4} align="stretch">
+
+        <FormControl isRequired>
+          <FormLabel>Nombre completo</FormLabel>
+          <Input name="fullName" value={address.fullName} onChange={handleAddressChange} />
+        </FormControl>
+
+        <FormControl isRequired>
+          <FormLabel>Calle</FormLabel>
+          <Input name="street" value={address.street} onChange={handleAddressChange} />
+        </FormControl>
+
+        <FormControl isRequired>
+          <FormLabel>Número</FormLabel>
+          <Input name="number" value={address.number} onChange={handleAddressChange} />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Colonia (opcional)</FormLabel>
+          <Input name="neighborhood" value={address.neighborhood} onChange={handleAddressChange} />
+        </FormControl>
+
+        <FormControl isRequired>
+          <FormLabel>Código Postal</FormLabel>
+          <Input name="postalCode" value={address.postalCode} onChange={handleAddressChange} />
+        </FormControl>
+
+        <FormControl isRequired>
+          <FormLabel>Ciudad</FormLabel>
+          <Input name="city" value={address.city} onChange={handleAddressChange} />
+        </FormControl>
+
+        <FormControl isRequired>
+          <FormLabel>Estado</FormLabel>
+          <Input name="state" value={address.state} onChange={handleAddressChange} />
+        </FormControl>
+
+        <FormControl isRequired>
+          <FormLabel>Teléfono</FormLabel>
+          <Input name="phone" value={address.phone} onChange={handleAddressChange} />
+        </FormControl>
+
+        <Text fontWeight="bold" fontSize="lg" textAlign="right">Total: ${total} MXN</Text>
+
+        <Button colorScheme="teal" onClick={handlePayment}>
+          Proceder al Pago
+        </Button>
+
       </VStack>
     </Box>
   );

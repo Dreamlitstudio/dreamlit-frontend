@@ -21,9 +21,11 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
+  HStack,
 } from "@chakra-ui/react";
 import { useEffect, useState, useRef } from "react";
 import { DeleteIcon } from "@chakra-ui/icons";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 interface Order {
   id: string;
@@ -34,16 +36,31 @@ interface Order {
   status: string;
   items: any;
   created_at: string;
+  street?: string;
+  number?: string;
+  neighborhood?: string;
+  postal_code?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  phone?: string;
 }
 
 const AdminPanel = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const cancelRef = useRef(null);
   const toast = useToast();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
 
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "";
   const ADMIN_PASSWORD = process.env.REACT_APP_ADMIN_PASSWORD || "";
@@ -52,8 +69,11 @@ const AdminPanel = () => {
     try {
       const response = await fetch(`${BACKEND_URL}/orders`);
       const data = await response.json();
-      console.log("🛠️ Órdenes recibidas:", data);
-      setOrders(Array.isArray(data) ? data : []);
+      const sorted = Array.isArray(data)
+        ? data.sort((a, b) => (b.created_at > a.created_at ? 1 : -1))
+        : [];
+      setOrders(sorted);
+      setFilteredOrders(sorted);
     } catch {
       toast({
         title: "Error",
@@ -77,6 +97,7 @@ const AdminPanel = () => {
       setOrders((prev) =>
         prev.map((o) => (o.id === id ? { ...o, status: newStatus } : o))
       );
+      applyFilters(searchTerm, filterStatus, startDate, endDate, selectedMonth);
       toast({ title: "Estado actualizado", status: "success" });
     }
   };
@@ -87,15 +108,67 @@ const AdminPanel = () => {
       method: "DELETE",
     });
     if (res.ok) {
-      setOrders((prev) => prev.filter((o) => o.id !== deleteId));
+      const updated = orders.filter((o) => o.id !== deleteId);
+      setOrders(updated);
+      applyFilters(searchTerm, filterStatus, startDate, endDate, selectedMonth, updated);
       toast({ title: "Orden eliminada", status: "info" });
     }
     setDeleteId(null);
   };
 
+  const applyFilters = (
+    term: string,
+    status: string,
+    start: string,
+    end: string,
+    month: string,
+    ordersList = orders
+  ) => {
+    let filtered = ordersList;
+
+    if (status !== "all") {
+      filtered = filtered.filter((order) => order.status === status);
+    }
+
+    if (term.trim() !== "") {
+      filtered = filtered.filter(
+        (order) =>
+          order.buyer_email.toLowerCase().includes(term.toLowerCase()) ||
+          `${order.first_name} ${order.last_name}`.toLowerCase().includes(term.toLowerCase())
+      );
+    }
+
+    if (start) {
+      const startTime = new Date(start).getTime();
+      filtered = filtered.filter((order) => new Date(order.created_at).getTime() >= startTime);
+    }
+
+    if (end) {
+      const endTime = new Date(end).getTime();
+      filtered = filtered.filter((order) => new Date(order.created_at).getTime() <= endTime);
+    }
+
+    if (month) {
+      const [year, monthNum] = month.split("-");
+      filtered = filtered.filter((order) => {
+        const orderDate = new Date(order.created_at);
+        return (
+          orderDate.getFullYear() === parseInt(year) &&
+          orderDate.getMonth() + 1 === parseInt(monthNum)
+        );
+      });
+    }
+
+    setFilteredOrders(filtered);
+  };
+
   useEffect(() => {
     if (authenticated) fetchOrders();
   }, [authenticated]);
+
+  useEffect(() => {
+    applyFilters(searchTerm, filterStatus, startDate, endDate, selectedMonth);
+  }, [searchTerm, filterStatus, startDate, endDate, selectedMonth]);
 
   if (!authenticated) {
     return (
@@ -137,104 +210,135 @@ const AdminPanel = () => {
     );
   }
 
+  // KPIs filtrados
+  const totalVentas = filteredOrders.reduce((sum, order) => {
+    let itemsArray: any[] = [];
+    try {
+      const raw = order.items;
+      if (typeof raw === "string") {
+        const parsed = JSON.parse(raw);
+        itemsArray = Array.isArray(parsed) ? parsed : [];
+      } else if (Array.isArray(raw)) {
+        itemsArray = raw;
+      }
+    } catch {
+      itemsArray = [];
+    }
+    const subtotal = itemsArray.reduce((acc, item) => acc + item.unit_price, 0);
+    return sum + subtotal;
+  }, 0);
+
+  const ticketPromedio =
+    filteredOrders.length > 0 ? (totalVentas / filteredOrders.length).toFixed(2) : "0.00";
+
+  // Preparar datos para gráfico
+  const salesByMonth = orders.reduce((acc, order) => {
+    const date = new Date(order.created_at);
+    const yearMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
+
+    let itemsArray: any[] = [];
+    try {
+      const raw = order.items;
+      if (typeof raw === "string") {
+        const parsed = JSON.parse(raw);
+        itemsArray = Array.isArray(parsed) ? parsed : [];
+      } else if (Array.isArray(raw)) {
+        itemsArray = raw;
+      }
+    } catch {
+      itemsArray = [];
+    }
+
+    const subtotal = itemsArray.reduce((acc, item) => acc + item.unit_price, 0);
+
+    acc[yearMonth] = (acc[yearMonth] || 0) + subtotal;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const chartData = Object.entries(salesByMonth)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, total]) => ({ month, total }));
+
   return (
     <Box p={8}>
       <Heading mb={6}>Panel de Administrador</Heading>
+
+      {/* KPIs */}
+      <Box mb={8} p={6} bg="gray.50" borderRadius="md" boxShadow="sm">
+        <Heading size="md" mb={4}>Resumen de Ventas (Filtrado)</Heading>
+        <HStack spacing={8} flexWrap="wrap">
+          <VStack><Text fontSize="sm" color="gray.600">Órdenes filtradas</Text><Text fontSize="xl" fontWeight="bold">{filteredOrders.length}</Text></VStack>
+          <VStack><Text fontSize="sm" color="gray.600">Ventas totales</Text><Text fontSize="xl" fontWeight="bold">${totalVentas.toLocaleString('es-MX')} MXN</Text></VStack>
+          <VStack><Text fontSize="sm" color="gray.600">Ticket promedio</Text><Text fontSize="xl" fontWeight="bold">${ticketPromedio} MXN</Text></VStack>
+        </HStack>
+      </Box>
+
+      {/* Gráfico */}
+      <Box mb={10} p={6} bg="white" borderRadius="md" boxShadow="sm">
+        <Heading size="md" mb={4}>Ventas por Mes</Heading>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="total" fill="#225059" />
+          </BarChart>
+        </ResponsiveContainer>
+      </Box>
+
+      {/* Filtros */}
+      <HStack mb={6} spacing={4} flexWrap="wrap">
+        <Input placeholder="Buscar por email o nombre" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+        <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} width="200px">
+          <option value="all">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="en producción">En producción</option>
+          <option value="enviado">Enviado</option>
+          <option value="recibido">Recibido</option>
+        </Select>
+        <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        <Input type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} />
+      </HStack>
+
+      {/* Tabla */}
       <Table variant="simple" bg="white" borderRadius="md" overflow="hidden">
         <Thead bg="gray.100">
           <Tr>
-            <Th>Fecha</Th>
-            <Th>Email</Th>
-            <Th>Nombre</Th>
-            <Th>Productos</Th>
-            <Th>Estado</Th>
-            <Th></Th>
+            <Th>Fecha</Th><Th>Email</Th><Th>Nombre</Th><Th>Estado</Th><Th></Th>
           </Tr>
         </Thead>
         <Tbody>
-          {orders.map((order) => {
-            let itemsArray: any[] = [];
-
-            try {
-              const raw = order.items;
-              if (typeof raw === "string") {
-                const parsed = JSON.parse(raw);
-                itemsArray = Array.isArray(parsed) ? parsed : [];
-              } else if (Array.isArray(raw)) {
-                itemsArray = raw;
-              }
-            } catch (e) {
-              itemsArray = [];
-            }
-
-            return (
-              <Tr key={order.id}>
-                <Td>{new Date(order.created_at).toLocaleDateString()}</Td>
-                <Td>{order.buyer_email}</Td>
-                <Td>{order.first_name} {order.last_name}</Td>
-                <Td>
-                  <VStack align="start">
-                    {itemsArray.length > 0 ? (
-                      itemsArray.map((item: any, i: number) => (
-                        <Text key={i}>
-                          {item.title} - ${item.unit_price} MXN
-                        </Text>
-                      ))
-                    ) : (
-                      <Text color="red.500">⚠️ No se pudieron mostrar productos</Text>
-                    )}
-                  </VStack>
-                </Td>
-                <Td>
-                  <Select
-                    value={order.status}
-                    onChange={(e) =>
-                      updateOrderStatus(order.id, e.target.value)
-                    }
-                  >
-                    <option value="pendiente">Pendiente</option>
-                    <option value="en producción">En producción</option>
-                    <option value="enviado">Enviado</option>
-                    <option value="recibido">Recibido</option>
-                  </Select>
-                </Td>
-                <Td>
-                  <IconButton
-                    icon={<DeleteIcon />}
-                    aria-label="Eliminar orden"
-                    onClick={() => setDeleteId(order.id)}
-                    size="sm"
-                    colorScheme="red"
-                  />
-                </Td>
-              </Tr>
-            );
-          })}
+          {filteredOrders.map(order => (
+            <Tr key={order.id}>
+              <Td>{new Date(order.created_at).toLocaleDateString()}</Td>
+              <Td>{order.buyer_email}</Td>
+              <Td>{order.first_name} {order.last_name}</Td>
+              <Td>
+                <Select value={order.status} onChange={(e) => updateOrderStatus(order.id, e.target.value)}>
+                  <option value="pendiente">Pendiente</option>
+                  <option value="en producción">En producción</option>
+                  <option value="enviado">Enviado</option>
+                  <option value="recibido">Recibido</option>
+                </Select>
+              </Td>
+              <Td>
+                <IconButton icon={<DeleteIcon />} aria-label="Eliminar orden" onClick={() => setDeleteId(order.id)} size="sm" colorScheme="red" />
+              </Td>
+            </Tr>
+          ))}
         </Tbody>
       </Table>
 
-      <AlertDialog
-        isOpen={!!deleteId}
-        leastDestructiveRef={cancelRef}
-        onClose={() => setDeleteId(null)}
-      >
+      <AlertDialog isOpen={!!deleteId} leastDestructiveRef={cancelRef} onClose={() => setDeleteId(null)}>
         <AlertDialogOverlay>
           <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              ¿Eliminar orden?
-            </AlertDialogHeader>
-
-            <AlertDialogBody>
-              Esta acción no se puede deshacer.
-            </AlertDialogBody>
-
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">¿Eliminar orden?</AlertDialogHeader>
+            <AlertDialogBody>Esta acción no se puede deshacer.</AlertDialogBody>
             <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={() => setDeleteId(null)}>
-                Cancelar
-              </Button>
-              <Button colorScheme="red" onClick={deleteOrder} ml={3}>
-                Eliminar
-              </Button>
+              <Button ref={cancelRef} onClick={() => setDeleteId(null)}>Cancelar</Button>
+              <Button colorScheme="red" onClick={deleteOrder} ml={3}>Eliminar</Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialogOverlay>

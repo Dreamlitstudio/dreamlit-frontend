@@ -4,6 +4,8 @@ import Home from "./pages/Home";
 import Catalog from "./pages/Catalog";
 import Customize from "./pages/Customize";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import ThankYou from "./pages/ThankYou";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import AdminPanel from "./pages/AdminPanel";
@@ -33,6 +35,8 @@ const App = () => {
             <Route path="/catalog" element={<Catalog />} />
             <Route path="/customize" element={<Customize />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/thankyou" element={<ThankYou />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<AdminPanel />} />

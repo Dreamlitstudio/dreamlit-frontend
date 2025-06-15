@@ -1,11 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-
-interface Product {
-  name: string;
-  price: number;
-  imageUrl: string;
-  customName: string;
-}
+import { Product } from "../types/Product";
 
 interface CartContextProps {
   cart: Product[];

@@ -8,99 +8,17 @@ import {
   Text,
   VStack,
   Divider,
-  useToast,
   IconButton,
-  Input,
 } from "@chakra-ui/react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { FaTrash } from "react-icons/fa";
-import { useState } from "react";
 
 const Cart = () => {
   const { cart, removeFromCart } = useCart();
   const navigate = useNavigate();
-  const toast = useToast();
 
-  const [email, setEmail] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-
-  const total = cart.reduce((acc, item) => acc + Number(item.price), 0);
-
-  const handlePayment = async () => {
-    if (!email || !email.includes("@")) {
-      toast({
-        title: "Correo inválido",
-        description: "Por favor ingresa un correo válido.",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    if (!firstName || !lastName) {
-      toast({
-        title: "Faltan datos",
-        description: "Ingresa tu nombre y apellido.",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    try {
-      const external_reference = `order-${Date.now()}`;
-
-      const formattedItems = cart.map((item, index) => ({
-        id: `lamp-${index}`,
-        title: `${item.name} - ${item.customName}`,
-        description: `Lámpara personalizada con el nombre "${item.customName}"`,
-        category_id: "home_decor",
-        quantity: 1,
-        unit_price: Number(item.price),
-        currency_id: "MXN",
-        image_url: item.imageUrl,
-      }));
-
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/create_preference`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items: formattedItems,
-          email,
-          external_reference,
-          first_name: firstName,
-          last_name: lastName,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error en la respuesta: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.init_point) {
-        window.location.href = data.init_point;
-      } else {
-        throw new Error("No se recibió un punto de inicio de pago.");
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Hubo un problema al iniciar el pago. Intenta nuevamente.",
-        status: "error",
-        duration: 4000,
-        isClosable: true,
-      });
-      console.error("❌ Error en el pago:", error);
-    }
-  };
+  const total = cart.reduce((acc, item) => acc + item.price, 0);
 
   if (cart.length === 0) {
     return (
@@ -145,6 +63,9 @@ const Cart = () => {
               <Text fontSize="sm" color="gray.600">
                 Personalización: {item.customName}
               </Text>
+              <Text fontSize="sm" color="gray.600">
+                Envío: {item.shippingType === "standard" ? "Estándar (Gratis)" : "Express (+$150)"}
+              </Text>
               <Text fontSize="md" fontWeight="bold">
                 ${item.price} MXN
               </Text>
@@ -161,37 +82,11 @@ const Cart = () => {
 
         <Divider />
 
-        <Box>
-          <Text mb={2}>Nombre del comprador:</Text>
-          <Input
-            placeholder="Nombre"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            bg="white"
-            mb={2}
-          />
-          <Input
-            placeholder="Apellido"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            bg="white"
-            mb={4}
-          />
-          <Text mb={2}>Correo electrónico para confirmación:</Text>
-          <Input
-            placeholder="tucorreo@ejemplo.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-            bg="white"
-          />
-        </Box>
-
         <Box textAlign="right">
           <Text fontSize="lg" fontWeight="bold" mb="4">
             Total: ${total} MXN
           </Text>
-          <Button colorScheme="teal" onClick={handlePayment}>
+          <Button colorScheme="teal" onClick={() => navigate("/checkout")}>
             Proceder al Pago
           </Button>
         </Box>
