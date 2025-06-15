@@ -42,7 +42,6 @@ const Checkout = () => {
   const total = cart.reduce((acc, item) => acc + item.price, 0);
 
   const handlePayment = async () => {
-    // Validación básica
     if (!firstName || !lastName || !email || !email.includes("@")) {
       toast({
         title: "Datos incompletos",
@@ -54,10 +53,7 @@ const Checkout = () => {
       return;
     }
 
-    if (
-      !address.street || !address.number || !address.postalCode ||
-      !address.city || !address.state || !address.phone
-    ) {
+    if (!address.street || !address.number || !address.postalCode || !address.city || !address.state || !address.phone) {
       toast({
         title: "Dirección incompleta",
         description: "Por favor completa todos los campos de envío.",
@@ -89,10 +85,12 @@ const Checkout = () => {
         body: JSON.stringify({
           items: formattedItems,
           external_reference,
-          email,
-          first_name: firstName,
-          last_name: lastName,
-          address,
+          address: {
+            ...address,
+            email,
+            first_name: firstName,
+            last_name: lastName,
+          }
         }),
       });
 
@@ -132,9 +130,7 @@ const Checkout = () => {
 
   return (
     <Box p={{ base: 5, md: 10 }}>
-      <Heading size="lg" mb={5}>
-        Datos de Compra y Envío
-      </Heading>
+      <Heading size="lg" mb={5}>Datos de Compra y Envío</Heading>
       <VStack spacing={4} align="stretch">
 
         <FormControl isRequired>
