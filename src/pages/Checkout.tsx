@@ -19,6 +19,10 @@ const Checkout = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+
   const [address, setAddress] = useState<Address>({
     fullName: "",
     street: "",
@@ -39,7 +43,28 @@ const Checkout = () => {
   const total = cart.reduce((acc, item) => acc + item.price, 0);
 
   const handlePayment = async () => {
-    // Validación básica
+    if (!email || !email.includes("@")) {
+      toast({
+        title: "Correo inválido",
+        description: "Por favor ingresa un correo válido.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (!firstName || !lastName) {
+      toast({
+        title: "Nombre incompleto",
+        description: "Por favor ingresa nombre y apellido.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
     if (!address.fullName || !address.street || !address.number || !address.postalCode || !address.city || !address.state || !address.phone) {
       toast({
         title: "Datos incompletos",
@@ -73,6 +98,9 @@ const Checkout = () => {
           items: formattedItems,
           address,
           external_reference,
+          email,
+          first_name: firstName,
+          last_name: lastName
         }),
       });
 
@@ -116,9 +144,23 @@ const Checkout = () => {
         Datos de envío
       </Heading>
       <VStack spacing={4} align="stretch">
+        <FormControl isRequired>
+          <FormLabel>Email</FormLabel>
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        </FormControl>
 
         <FormControl isRequired>
-          <FormLabel>Nombre completo</FormLabel>
+          <FormLabel>Nombre</FormLabel>
+          <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+        </FormControl>
+
+        <FormControl isRequired>
+          <FormLabel>Apellido</FormLabel>
+          <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
+        </FormControl>
+
+        <FormControl isRequired>
+          <FormLabel>Nombre completo para envío</FormLabel>
           <Input name="fullName" value={address.fullName} onChange={handleAddressChange} />
         </FormControl>
 
@@ -162,7 +204,6 @@ const Checkout = () => {
         <Button colorScheme="teal" onClick={handlePayment}>
           Proceder al Pago
         </Button>
-
       </VStack>
     </Box>
   );
