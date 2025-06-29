@@ -6,99 +6,309 @@ import {
   VStack,
   Container,
   Button,
-  Stack,
-  Divider,
-  useBreakpointValue,
+  SimpleGrid,
   Image,
+  HStack,
 } from "@chakra-ui/react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
-import { Navigation, Pagination } from "swiper";
 import { Link } from "react-router-dom";
-
-import leon from "../assets/leon.png";
-import koala from "../assets/koala.png";
-import perro from "../assets/perro.png";
-import logo from "../assets/logo.png";
+import principalImage from "../assets/principal.png";
+import animalesImage from "../assets/animales.png";
+import seleccionaIcon from "../assets/selecciona-icon.png";
+import personalizaIcon from "../assets/personaliza-icon.png";
+import pagaIcon from "../assets/paga-icon.png";
 
 const Home = () => {
-  const headingSize = useBreakpointValue({ base: "2xl", md: "3xl" });
-
   return (
-    <Box bg="#fefefe">
-      <Container maxW="container.xl" py={{ base: 8, md: 14 }}>
-        <VStack spacing={10}>
-          {/* Logo */}
-          <Image src={logo} alt="Logo" boxSize="80px" />
+    <Box bg="#FAF3DF" color="#333" fontFamily="Nunito">
+      {/* Hero */}
+      <Box position="relative" textAlign="center">
+        <Image
+          src={principalImage}
+          alt="Hero principal"
+          width="100%"
+          objectFit="cover"
+          maxH={{ base: "300px", md: "500px" }}
+        />
+        <Heading
+          position="absolute"
+          top="50%"
+          left="50%"
+          transform="translate(-50%, -50%)"
+          color="#225059"
+          fontFamily="Catalish Huntera"
+          fontSize={{ base: "3xl", md: "5xl" }}
+          px={4}
+        >
+          Lámparas que abrazan sueños
+        </Heading>
+      </Box>
 
-          {/* Título y descripción */}
-          <Heading size={headingSize} color="#225059" textAlign="center">
-            Dream Lit Studio ✨
-          </Heading>
-          <Text fontSize={{ base: "md", md: "lg" }} textAlign="center" px={4} color="#444">
-            Creamos lámparas personalizables para los más pequeños, llenas de luz,
-            cariño y un toque único. Explora nuestros modelos y personaliza el nombre
-            de cada lámpara para un regalo especial que ilumine sus sueños.
+      <Container maxW="container.lg" py={10}>
+        {/* Descripción principal */}
+        <VStack spacing={4} mb={10}>
+          <Text fontSize="lg" fontWeight="medium" textAlign="center">
+            Ilumina el cuarto de tus hijos con piezas personalizadas llenas de ternura,
+            magia y diseño. Creadas con amor para acompañarlos cada noche con su nombre
+            y su historia.
           </Text>
-
-          {/* Carrusel */}
-          <Box w="100%" maxW="600px">
-            <Swiper
-              modules={[Navigation, Pagination]}
-              navigation
-              pagination={{ clickable: true }}
-              loop
-              style={{ width: "100%", height: "100%" }}
-            >
-              {[leon, koala, perro].map((img, idx) => (
-                <SwiperSlide key={idx}>
-                  <img
-                    src={img}
-                    alt={`Lámpara ${idx}`}
-                    style={{
-                      width: "100%",
-                      height: "320px",
-                      objectFit: "contain",
-                    }}
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </Box>
-
-          {/* Botón CTA */}
           <Button
             as={Link}
             to="/catalog"
             size="lg"
             bg="#225059"
-            color="#9fe0ed"
-            _hover={{ bg: "rgba(255,255,255,0.2)", color: "white" }}
+            color="#FAF3DF"
+            _hover={{ bg: "#2c6b74" }}
           >
-            Explora nuestros modelos
+            Elige tu personaje favorito
           </Button>
+        </VStack>
 
-          <Divider borderColor="#225059" />
+        {/* Pasos */}
+        <Heading
+          textAlign="center"
+          fontFamily="Naishila Dancing Script"
+          fontSize="2xl"
+          color="#E07A5F"
+          mb={8}
+        >
+          Así empieza la magia personalizada
+        </Heading>
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={10}>
+          <Box
+            bg="white"
+            p={6}
+            borderRadius="md"
+            boxShadow="sm"
+            textAlign="center"
+          >
+            <Image
+              src={seleccionaIcon}
+              alt="Selecciona tu personaje"
+              height="100px"
+              width="auto"
+              mb={4}
+              mx="auto"
+            />
+            <Text
+              fontFamily="Nunito"
+              fontWeight="bold"
+              color="#E07A5F"
+              fontSize="3xl"
+              mb={2}
+            >
+              PASO 1
+            </Text>
+            <Text fontWeight="bold" mb={1}>
+              Descubre quién iluminará sus sueños.
+            </Text>
+            <Text>
+              Cada personaje tiene su propia ternura.
+              Escoge el animalito que mejor combine con la historia de tu pequeño.
+            </Text>
+          </Box>
 
-          {/* Sección Sobre Nosotros */}
-          <Stack spacing={6} textAlign="center" px={4}>
-            <Heading size="lg" color="#225059">
-              Sobre Nosotros
-            </Heading>
-            <Text fontSize="md" color="#444">
-              En Dream Lit Studio creemos en la magia de los detalles. Nuestras lámparas
-              no solo iluminan, sino que también crean un vínculo emocional. Cada modelo
-              es diseñado con cariño, y la personalización le añade ese toque único que
-              convierte un objeto en un recuerdo para toda la vida.
+          <Box
+            bg="white"
+            p={6}
+            borderRadius="md"
+            boxShadow="sm"
+            textAlign="center"
+          >
+            <Image
+              src={personalizaIcon}
+              alt="Personaliza tu lámpara"
+              height="100px"
+              width="auto"
+              mb={4}
+              mx="auto"
+            />
+            <Text
+              fontFamily="Nunito"
+              fontWeight="bold"
+              color="#E7A74F"
+              fontSize="3xl"
+              mb={2}
+            >
+              PASO 2
             </Text>
-            <Text fontSize="md" color="#444">
-              Nuestro compromiso es ofrecer productos de calidad, que además de ser
-              funcionales, decoren y embellezcan los espacios de los más pequeños.
-              Cada lámpara es un reflejo de amor y cuidado en cada detalle.
+            <Text fontWeight="bold" mb={1}>
+              Hazlo único como tu pequeño.
             </Text>
-          </Stack>
+            <Text>
+              Tu toque personal lo transforma en un regalo con emoción, memoria y cariño.
+            </Text>
+          </Box>
+
+          <Box
+            bg="white"
+            p={6}
+            borderRadius="md"
+            boxShadow="sm"
+            textAlign="center"
+          >
+            <Image
+              src={pagaIcon}
+              alt="Paga de forma segura"
+              height="100px"
+              width="auto"
+              mb={4}
+              mx="auto"
+            />
+            <Text
+              fontFamily="Nunito"
+              fontWeight="bold"
+              color="#E07A5F"
+              fontSize="3xl"
+              mb={2}
+            >
+              PASO 3
+            </Text>
+            <Text fontWeight="bold" mb={1}>
+              Último paso para hacerlo realidad.
+            </Text>
+            <Text>
+              Completa tu compra de forma fácil y segura. En poco tiempo, la magia estará tocando tu puerta.
+            </Text>
+          </Box>
+        </SimpleGrid>
+
+        {/* Beneficios */}
+        <Heading
+          textAlign="center"
+          fontFamily="Naishila Dancing Script"
+          fontSize="2xl"
+          color="#E07A5F"
+          mb={2}
+        >
+          Beneficios para tu pequeño
+        </Heading>
+        <Text
+          textAlign="center"
+          fontSize="lg"
+          color="#E07A5F"
+          mb={8}
+        >
+          Seguridad suave toda la noche con un amigo que brilla contigo.
+        </Text>
+        <SimpleGrid columns={1} spacing={6} mb={10}>
+          <Box>
+            <HStack align="center" spacing={4}>
+              <Text
+                fontFamily="Nunito"
+                fontWeight="extrabold"
+                fontSize="5xl"
+                color="#D9A86C"
+                minW="30px"
+              >
+                1
+              </Text>
+              <Text>
+                Dormir se vuelve más fácil cuando no se sienten solos. Esta luz suave los acompaña toda la noche, con un personaje que les da calma, compañía y convierte su cuarto en un lugar mágico solo para ellos.
+              </Text>
+            </HStack>
+          </Box>
+          <Box>
+            <HStack align="center" spacing={4}>
+              <Text
+                fontFamily="Nunito"
+                fontWeight="extrabold"
+                fontSize="5xl"
+                color="#E07A5F"
+                minW="30px"
+              >
+                2
+              </Text>
+              <Text>
+                No es solo una lámpara. Es una presencia tranquila que los acompaña mientras duermen, les da seguridad si se despiertan y les recuerda que ese espacio está hecho con amor solo para ellos.
+              </Text>
+            </HStack>
+          </Box>
+          <Box>
+            <HStack align="center" spacing={4}>
+              <Text
+                fontFamily="Nunito"
+                fontWeight="extrabold"
+                fontSize="5xl"
+                color="#5C3A1D"
+                minW="30px"
+              >
+                3
+              </Text>
+              <Text>
+                Cada niño tiene su héroe nocturno. Este compañero de luz los ayuda a dormir mejor, sin miedos, con una luz tenue que cuida cada despertar, cada paso al baño, cada suspiro en medio de la noche.
+              </Text>
+            </HStack>
+          </Box>
+          <Box>
+            <HStack align="center" spacing={4}>
+              <Text
+                fontFamily="Nunito"
+                fontWeight="extrabold"
+                fontSize="5xl"
+                color="#999999"
+                minW="30px"
+              >
+                4
+              </Text>
+              <Text>
+                Con un rincón pensado solo para él o ella, se sienten seguros, únicos y acompañados. La lámpara no solo alumbra: transforma, abraza y convierte la noche en una experiencia tierna y especial.
+              </Text>
+            </HStack>
+          </Box>
+        </SimpleGrid>
+
+        {/* Imagen testimonial */}
+        <VStack mb={10}>
+          <Image
+            src={animalesImage}
+            alt="Animales decorativos"
+            borderRadius="md"
+            maxH="300px"
+            objectFit="cover"
+          />
+        </VStack>
+
+        {/* Características */}
+        <Heading
+          textAlign="center"
+          fontFamily="Naishila Dancing Script"
+          fontSize="2xl"
+          color="#E07A5F"
+          mb={8}
+        >
+          Características
+        </Heading>
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={10}>
+          <Box>
+            <Text fontWeight="bold">✂️ Corte láser seguro</Text>
+            <Text>Bordes limpios y redondeados, ideales para manos pequeñas.</Text>
+          </Box>
+          <Box>
+            <Text fontWeight="bold">💫 Acrílico duradero</Text>
+            <Text>Material ligero, brillante y resistente para uso infantil diario.</Text>
+          </Box>
+          <Box>
+            <Text fontWeight="bold">💡 Luz LED</Text>
+            <Text>Iluminación suave, sin calor, para noches largas y tranquilas.</Text>
+          </Box>
+          <Box>
+            <Text fontWeight="bold">❤️ Hecho con dedicación</Text>
+            <Text>Cada pieza se arma a mano, bajo pedido especial.</Text>
+          </Box>
+        </SimpleGrid>
+
+        {/* Botón final */}
+        <VStack mb={10}>
+          <Button
+            as={Link}
+            to="/catalog"
+            size="lg"
+            bg="#225059"
+            color="#FAF3DF"
+            _hover={{ bg: "#2c6b74" }}
+          >
+            Ver los personajes
+          </Button>
         </VStack>
       </Container>
     </Box>
