@@ -83,9 +83,14 @@ const PromoLampCard = ({ lamp }: any) => {
             <Badge colorScheme="green" mt={1}>
               15% Descuento
             </Badge>
-            <Text fontWeight="bold" color="#E07A5F" fontSize="lg" mt={2}>
-              ${discountedPrice}
-            </Text>
+            <Flex align="center" mt={2} gap={2}>
+              <Text as="s" fontSize="sm" color="gray.500">
+                ${lamp.price}
+              </Text>
+              <Text fontWeight="bold" color="#E07A5F" fontSize="lg">
+                ${discountedPrice}
+              </Text>
+            </Flex>
           </Flex>
 
           {/* Cara trasera */}
@@ -197,13 +202,22 @@ const PromoLampCard = ({ lamp }: any) => {
           <Badge colorScheme="green" mb={2}>
             15% Descuento
           </Badge>
-          <Text fontSize="sm" fontWeight="medium" color="#225059" mb={2}>
+          <Flex align="center" justify="center" gap={2} mt={2}>
+            <Text as="s" fontSize="sm" color="gray.500">
+              ${lamp.price}
+            </Text>
+            <Text fontWeight="bold" color="#E07A5F" fontSize="lg">
+              ${discountedPrice}
+            </Text>
+          </Flex>
+          <Text fontSize="sm" fontWeight="medium" color="#225059" mt={2}>
             {description}
           </Text>
-          <Text fontSize="xs" color="green.600" mb={2}>
+          <Text fontSize="xs" color="green.600" mt={2}>
             Promoción exclusiva por tiempo limitado
           </Text>
           <Button
+            mt={3}
             color="#225059"
             borderColor="#225059"
             border="1px solid"
