@@ -9,6 +9,8 @@ import ThankYou from "./pages/ThankYou";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import AdminPanel from "./pages/AdminPanel";
+import LandingPage from "./pages/LandingPage";
+import PromoCatalog from "./pages/PromoCatalog";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
@@ -40,6 +42,8 @@ const App = () => {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/promo" element={<LandingPage />} />
+            <Route path="/promo-catalog" element={<PromoCatalog />} />
           </Routes>
         </main>
         <Footer />
