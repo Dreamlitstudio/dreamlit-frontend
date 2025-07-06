@@ -49,11 +49,12 @@ const LandingPage = () => {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from("promo_contacts").insert([
+    const { error } = await supabase.from("promo_access").insert([
       {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
+        accepted: true, // opcional si quieres registrar que aceptaron
       },
     ]);
     setLoading(false);
