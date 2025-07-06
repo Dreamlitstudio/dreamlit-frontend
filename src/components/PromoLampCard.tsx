@@ -58,7 +58,7 @@ const PromoLampCard = ({ lamp }: any) => {
             position="absolute"
             w="100%"
             h="100%"
-            border="3px solid #E07A5F" // Color distintivo
+            border="3px solid #E07A5F"
             borderRadius="lg"
             bg="white"
             boxShadow="md"
@@ -145,9 +145,9 @@ const PromoLampCard = ({ lamp }: any) => {
                       lamp: {
                         ...lamp,
                         price: discountedPrice,
-                        isPromo: true,
-                      },
-                    })
+                        isPromo: true
+                      }
+                    }
                   })
                 }
               >
@@ -215,9 +215,9 @@ const PromoLampCard = ({ lamp }: any) => {
                   lamp: {
                     ...lamp,
                     price: discountedPrice,
-                    isPromo: true,
-                  },
-                })
+                    isPromo: true
+                  }
+                }
               })
             }
           >
