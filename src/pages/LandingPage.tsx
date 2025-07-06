@@ -1,9 +1,7 @@
 // src/pages/LandingPage.tsx
-import React, { useState } from "react";
 import {
   Box,
   Button,
-  Checkbox,
   Container,
   FormControl,
   FormLabel,
@@ -11,114 +9,147 @@ import {
   Input,
   Text,
   VStack,
-  Alert,
-  AlertIcon,
+  Checkbox,
+  useToast,
 } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-// Configura Supabase con tus variables de entorno
-const supabase = createClient(
-  process.env.REACT_APP_SUPABASE_URL!,
-  process.env.REACT_APP_SUPABASE_ANON_KEY!
-);
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL!;
+const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const LandingPage = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [accepted, setAccepted] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    acceptPolicy: false,
+  });
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const navigate = useNavigate();
+  const toast = useToast();
 
-  const handleSubmit = async () => {
-    if (!name || !email || !accepted) {
-      alert("Por favor completa todos los campos y acepta la política.");
+  const handleChange = (e: any) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    if (!formData.acceptPolicy) {
+      toast({
+        title: "Debes aceptar la política de privacidad.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
       return;
     }
-
     setLoading(true);
-
-    const { error } = await supabase.from("promo_access").insert([
+    const { error } = await supabase.from("promo_contacts").insert([
       {
-        name,
-        email,
-        accepted: true,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
       },
     ]);
-
     setLoading(false);
-
     if (error) {
-      alert("Error al guardar tus datos. Intenta más tarde.");
-      console.error(error);
+      toast({
+        title: "Error al enviar los datos.",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     } else {
-      setSuccess(true);
-
-      // Redirige en 2 segundos
+      toast({
+        title: "¡Datos enviados con éxito!",
+        description: "Gracias por registrarte. Disfruta de tu descuento especial.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        acceptPolicy: false,
+      });
       setTimeout(() => {
-        navigate("/promo-catalog");
-      }, 2000);
+        window.location.href = "/promo-catalog";
+      }, 1500);
     }
   };
 
   return (
-    <Box bg="#FAF3DF" minH="100vh" py={12}>
-      <Container maxW="md" bg="white" p={8} borderRadius="md" boxShadow="md">
-        <VStack spacing={6} align="stretch">
-          <Heading size="lg" textAlign="center" color="#225059">
-            Acceso exclusivo
-          </Heading>
-          <Text textAlign="center" fontSize="sm" color="gray.600">
-            Ingresa tus datos y acepta la política de privacidad para acceder a precios especiales.
-          </Text>
-
-          {success && (
-            <Alert status="success" borderRadius="md">
-              <AlertIcon />
-              ✅ Gracias, te estamos redirigiendo...
-            </Alert>
-          )}
-
-          {!success && (
-            <>
-              <FormControl>
-                <FormLabel>Nombre</FormLabel>
-                <Input
-                  placeholder="Tu nombre"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </FormControl>
-              <FormControl>
-                <FormLabel>Email</FormLabel>
-                <Input
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </FormControl>
-              <Checkbox
-                isChecked={accepted}
-                onChange={(e) => setAccepted(e.target.checked)}
+    <Container maxW="md" py={10}>
+      <VStack spacing={6} align="stretch">
+        <Heading size="lg" color="#225059" textAlign="center">
+          Acceso Exclusivo 🌟
+        </Heading>
+        <Text textAlign="center" color="gray.600">
+          Deja tus datos para desbloquear un 15% de descuento especial en tu compra.
+        </Text>
+        <form onSubmit={handleSubmit}>
+          <VStack spacing={4} align="stretch">
+            <FormControl isRequired>
+              <FormLabel>Nombre completo</FormLabel>
+              <Input
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+              />
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Correo electrónico</FormLabel>
+              <Input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Teléfono</FormLabel>
+              <Input
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+              />
+            </FormControl>
+            <Checkbox
+              name="acceptPolicy"
+              isChecked={formData.acceptPolicy}
+              onChange={handleChange}
+              colorScheme="teal"
+            >
+              Acepto la{" "}
+              <a
+                href="/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "#225059", textDecoration: "underline" }}
               >
-                Acepto la política de privacidad
-              </Checkbox>
-              <Button
-                bg="#225059"
-                color="#FAF3DF"
-                _hover={{ bg: "#2c6b74" }}
-                isLoading={loading}
-                onClick={handleSubmit}
-              >
-                Acceder al catálogo especial
-              </Button>
-            </>
-          )}
-        </VStack>
-      </Container>
-    </Box>
+                política de privacidad
+              </a>
+              .
+            </Checkbox>
+            <Button
+              type="submit"
+              isLoading={loading}
+              colorScheme="teal"
+              width="full"
+            >
+              Enviar y desbloquear descuento
+            </Button>
+          </VStack>
+        </form>
+      </VStack>
+    </Container>
   );
 };
 

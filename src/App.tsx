@@ -13,6 +13,7 @@ import LandingPage from "./pages/LandingPage";
 import PromoCatalog from "./pages/PromoCatalog";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const App = () => {
   return (
@@ -44,6 +45,7 @@ const App = () => {
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/promo" element={<LandingPage />} />
             <Route path="/promo-catalog" element={<PromoCatalog />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           </Routes>
         </main>
         <Footer />
