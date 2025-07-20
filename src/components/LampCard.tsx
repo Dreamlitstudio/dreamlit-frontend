@@ -1,3 +1,4 @@
+// src/components/LampCard.tsx
 import {
   Box,
   Image,
@@ -5,24 +6,39 @@ import {
   Button,
   Flex,
   Heading,
+  IconButton,
   useBreakpointValue,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { Lamp } from "../types/Lamp";
 import logo from "../assets/logo.png";
 
-const LampCard = ({ lamp }: any) => {
+interface LampCardProps {
+  lamp: Lamp;
+}
+
+const LampCard = ({ lamp }: LampCardProps) => {
   const navigate = useNavigate();
   const isMobile = useBreakpointValue({ base: true, md: false });
-  const [tilt, setTilt] = useState(false);
 
-  useEffect(() => {
-    if (!isMobile) {
-      setTilt(true);
-      const timer = setTimeout(() => setTilt(false), 800);
-      return () => clearTimeout(timer);
-    }
-  }, [isMobile]);
+  const imageSet: Record<Lamp["name"], string[]> = {
+    Kiki: ["/assets/koala1.png", "/assets/koala2.png", "/assets/koala3.png"],
+    Zaza: ["/assets/leon1.png", "/assets/leon2.png", "/assets/leon3.png"],
+    Nono: ["/assets/perro1.png", "/assets/perro2.png", "/assets/perro3.png"],
+  };
+
+  const images = imageSet[lamp.name];
+  const [index, setIndex] = useState(0);
+
+  const handlePrev = () => {
+    setIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
 
   const description =
     lamp.name === "Kiki"
@@ -32,162 +48,80 @@ const LampCard = ({ lamp }: any) => {
       : "Fiel y cariñoso, es el mejor compañero para soñar sin miedo.";
 
   return (
-    <>
-      {/* Tarjeta */}
-      <Box
-        w={{ base: "85%", sm: "85%", md: "85%" }}
-        maxW="280px"
-        aspectRatio={1}
-        mx="auto"
-        mb={isMobile ? 4 : 0}
-        className={!isMobile && tilt ? "initial-tilt" : ""}
-        sx={{ perspective: "1000px" }}
-      >
-        <Box
-          w="100%"
-          h="100%"
-          position="relative"
-          className={!isMobile ? "flip-card-inner" : ""}
-        >
-          {/* Cara frontal */}
-          <Flex
-            className="flip-card-front"
-            position="absolute"
-            w="100%"
-            h="100%"
-            border="3px solid #225059"
-            borderRadius="lg"
-            bg="white"
-            boxShadow="md"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            p={4}
-            sx={{ backfaceVisibility: "hidden" }}
-          >
-            <Image
-              src={lamp.imageUrl}
-              alt={lamp.name}
-              borderRadius="md"
-              objectFit="contain"
-              maxH="55%"
-              mb={3}
-              sx={{ imageRendering: "auto" }}
-            />
-            <Heading size="md" mt={1} color="#225059">
-              {lamp.name}
-            </Heading>
-            <Text fontWeight="bold" color="#225059" fontSize="lg" mt={2}>
-              ${lamp.price}
-            </Text>
-          </Flex>
-
-          {/* Cara trasera (solo en desktop) */}
-          {!isMobile && (
-            <Flex
-              className="flip-card-back"
-              position="absolute"
-              w="100%"
-              h="100%"
-              border="3px solid #225059"
-              borderRadius="lg"
-              bg="white"
-              boxShadow="md"
-              transform="rotateY(180deg)"
-              flexDirection="column"
-              alignItems="center"
-              justifyContent="center"
-              textAlign="center"
-              p={4}
-              sx={{ backfaceVisibility: "hidden" }}
-            >
-              <Image
-                src={logo}
-                alt="Logo"
-                opacity={0.05}
-                position="absolute"
-                top="50%"
-                left="50%"
-                transform="translate(-50%, -50%)"
-                maxH="85%"
-                pointerEvents="none"
-                userSelect="none"
-              />
-              <Text zIndex={1} fontSize="sm" fontWeight="medium" color="#225059">
-                {description}
-              </Text>
-              <Button
-                mt={4}
-                color="#225059"
-                borderColor="#225059"
-                border="1px solid"
-                variant="outline"
-                zIndex={1}
-                _hover={{
-                  bg: "#225059",
-                  color: "white",
-                }}
-                onClick={() => navigate("/customize", { state: { lamp } })}
-              >
-                Personalizar
-              </Button>
-            </Flex>
-          )}
-        </Box>
-
-        {/* Estilos de animación y flip */}
-        {!isMobile && (
-          <style>{`
-            .flip-card-inner {
-              transition: transform 0.8s ease;
-              transform-style: preserve-3d;
-            }
-
-            .flip-card-inner:hover {
-              transform: rotateY(180deg);
-            }
-
-            .flip-card-front,
-            .flip-card-back {
-              position: absolute;
-              width: 100%;
-              height: 100%;
-              border-radius: 12px;
-              backface-visibility: hidden;
-            }
-
-            .initial-tilt .flip-card-inner {
-              animation: tiltOnce 0.8s ease;
-            }
-
-            @keyframes tiltOnce {
-              0% { transform: rotateY(0deg); }
-              50% { transform: rotateY(10deg); }
-              100% { transform: rotateY(0deg); }
-            }
-          `}</style>
-        )}
+    <Box
+      w={{ base: "90%", sm: "85%", md: "280px" }}
+      maxW="100%"
+      aspectRatio={4 / 5}
+      mx="auto"
+      border="3px solid #225059"
+      borderRadius="lg"
+      bg="white"
+      boxShadow="md"
+      p={4}
+      position="relative"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="space-between"
+    >
+      <Box position="relative" w="100%" h="60%">
+        <Image
+          src={images[index]}
+          alt={lamp.name}
+          objectFit="contain"
+          maxH="100%"
+          mx="auto"
+        />
+        <IconButton
+          icon={<ChevronLeftIcon />}
+          aria-label="Anterior"
+          onClick={handlePrev}
+          size="sm"
+          position="absolute"
+          top="50%"
+          left="0"
+          transform="translateY(-50%)"
+          bg="transparent"
+          _hover={{ bg: "gray.100" }}
+        />
+        <IconButton
+          icon={<ChevronRightIcon />}
+          aria-label="Siguiente"
+          onClick={handleNext}
+          size="sm"
+          position="absolute"
+          top="50%"
+          right="0"
+          transform="translateY(-50%)"
+          bg="transparent"
+          _hover={{ bg: "gray.100" }}
+        />
       </Box>
 
-      {/* Contenido para móviles (fuera de la tarjeta) */}
-      {isMobile && (
-        <Box textAlign="center" px={6} mb={6}>
-          <Text fontSize="sm" fontWeight="medium" color="#225059" mb={2}>
-            {description}
-          </Text>
-          <Button
-            color="#225059"
-            borderColor="#225059"
-            border="1px solid"
-            variant="outline"
-            _hover={{ bg: "#225059", color: "white" }}
-            onClick={() => navigate("/customize", { state: { lamp } })}
-          >
-            Personalizar
-          </Button>
-        </Box>
-      )}
-    </>
+      <Box mt={4} textAlign="center">
+        <Heading size="md" color="#225059">
+          {lamp.name}
+        </Heading>
+        <Text fontWeight="bold" color="#225059" fontSize="lg">
+          ${lamp.price}
+        </Text>
+        <Text fontSize="sm" color="gray.600" mt={2}>
+          {description}
+        </Text>
+        <Button
+          mt={3}
+          color="#225059"
+          borderColor="#225059"
+          border="1px solid"
+          variant="outline"
+          size="sm"
+          _hover={{ bg: "#225059", color: "white" }}
+          onClick={() => navigate("/customize", { state: { lamp } })}
+        >
+          Personalizar
+        </Button>
+      </Box>
+    </Box>
   );
 };
 

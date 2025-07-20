@@ -1,4 +1,3 @@
-// src/pages/PromoCatalog.tsx
 import {
   Grid,
   Box,

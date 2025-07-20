@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { Product } from "../types/Product";
+import { Product } from "../types/Lamp"; // 👈 correcto
 
 interface CartContextProps {
   cart: Product[];

@@ -1,10 +1,20 @@
 import React, { useState } from "react";
 import {
-  Box, Image, Input, Button, VStack, useToast, Text, Heading, Stack, Divider, Select
+  Box,
+  Image,
+  Input,
+  Button,
+  VStack,
+  useToast,
+  Text,
+  Heading,
+  Stack,
+  Divider,
+  Select,
 } from "@chakra-ui/react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { Product } from "../types/Product";
+import { Product } from "../types/Lamp";
 import "../assets/fonts/fonts.css";
 
 const Customize = () => {
@@ -66,10 +76,12 @@ const Customize = () => {
     }
 
     const newProduct: Product = {
+      id: lamp.id,
       name: lamp.name,
-      customName: customName,
+      description: lamp.description,
       imageUrl: lamp.imageUrl,
       price: calculateTotal(),
+      customName: customName,
       shippingType: shippingType,
     };
 
@@ -89,7 +101,9 @@ const Customize = () => {
   return (
     <Stack spacing={8} px={4} py={8} direction={{ base: "column", md: "row" }} maxW="6xl" mx="auto">
       <VStack spacing={6} flex="2">
-        <Heading color="#225059" size="lg" textAlign="center">Personaliza tu lámpara</Heading>
+        <Heading color="#225059" size="lg" textAlign="center">
+          Personaliza tu lámpara
+        </Heading>
         <Box position="relative" width="100%" maxW="400px">
           <Image src={lamp.imageUrl} alt={lamp.name} width="100%" objectFit="contain" />
           <svg viewBox="0 0 400 400" style={{ position: "absolute", top: 55, left: 0, width: "100%", height: "100%" }}>
@@ -100,8 +114,15 @@ const Customize = () => {
               const fontSize = isMobile ? 30 : 39;
 
               return (
-                <text key={index} x="200" y={renderText.length > 1 ? baseY + index * lineSpacing : baseY + 20}
-                  textAnchor="middle" fontSize={fontSize} fontFamily="NaishilaDancingScript" fill="black">
+                <text
+                  key={index}
+                  x="200"
+                  y={renderText.length > 1 ? baseY + index * lineSpacing : baseY + 20}
+                  textAnchor="middle"
+                  fontSize={fontSize}
+                  fontFamily="NaishilaDancingScript"
+                  fill="black"
+                >
                   {line}
                 </text>
               );
@@ -122,20 +143,35 @@ const Customize = () => {
       </VStack>
 
       <VStack spacing={6} flex="1" border="1px solid #225059" borderRadius="md" p={6} bg="#f7f7f7" height="fit-content">
-        <Text fontWeight="bold" fontSize="lg">Resumen de compra</Text>
+        <Text fontWeight="bold" fontSize="lg">
+          Resumen de compra
+        </Text>
         <Divider />
         <Text>Precio base: ${lamp.price} MXN</Text>
         <Box width="100%">
           <Text mb={1}>Selecciona envío:</Text>
-          <Select value={shippingType} onChange={(e) => setShippingType(e.target.value as "standard" | "express")}>
+          <Select
+            value={shippingType}
+            onChange={(e) => setShippingType(e.target.value as "standard" | "express")}
+          >
             <option value="standard">Estándar (Gratis)</option>
             <option value="express">Express (+$150 MXN)</option>
           </Select>
         </Box>
         <Divider />
-        <Text fontSize="xl" fontWeight="bold">Total: ${calculateTotal()} MXN</Text>
-        <Button bg="#225059" color="#9fe0ed" _hover={{ bg: "#1a3e45", color: "white" }}
-          size="lg" onClick={handleSave} width="100%">Guardar Personalización</Button>
+        <Text fontSize="xl" fontWeight="bold">
+          Total: ${calculateTotal()} MXN
+        </Text>
+        <Button
+          bg="#225059"
+          color="#9fe0ed"
+          _hover={{ bg: "#1a3e45", color: "white" }}
+          size="lg"
+          onClick={handleSave}
+          width="100%"
+        >
+          Guardar Personalización
+        </Button>
       </VStack>
     </Stack>
   );
