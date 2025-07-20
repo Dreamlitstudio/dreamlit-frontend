@@ -54,7 +54,7 @@ const LandingPage = () => {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        accepted: true, // opcional si quieres registrar que aceptaron
+        accepted: true,
       },
     ]);
     setLoading(false);
@@ -87,70 +87,80 @@ const LandingPage = () => {
   };
 
   return (
-    <Container maxW="md" py={10}>
-      <VStack spacing={6} align="stretch">
-        <Heading size="lg" color="#225059" textAlign="center">
-          Acceso Exclusivo 🌟
-        </Heading>
-        <Text textAlign="center" color="gray.600">
-          Deja tus datos para desbloquear un 15% de descuento especial en tu compra.
-        </Text>
-        <form onSubmit={handleSubmit}>
-          <VStack spacing={4} align="stretch">
-            <FormControl isRequired>
-              <FormLabel>Nombre completo</FormLabel>
-              <Input
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-              />
-            </FormControl>
-            <FormControl isRequired>
-              <FormLabel>Correo electrónico</FormLabel>
-              <Input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Teléfono</FormLabel>
-              <Input
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-            </FormControl>
-            <Checkbox
-              name="acceptPolicy"
-              isChecked={formData.acceptPolicy}
-              onChange={handleChange}
-              colorScheme="teal"
-            >
-              Acepto la{" "}
-              <a
-                href="/privacy-policy"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "#225059", textDecoration: "underline" }}
-              >
-                política de privacidad
-              </a>
-              .
-            </Checkbox>
-            <Button
-              type="submit"
-              isLoading={loading}
-              colorScheme="teal"
-              width="full"
-            >
-              Enviar y desbloquear descuento
-            </Button>
+    <Box bg="#fdfcf9" minH="100vh" py={10}>
+      <Container maxW="md">
+        <Box
+          bg="white"
+          borderRadius="md"
+          boxShadow="md"
+          p={8}
+          border="1px solid #e2e8f0"
+        >
+          <VStack spacing={6} align="stretch">
+            <Heading size="lg" color="#225059" textAlign="center">
+              Acceso Exclusivo 🌟
+            </Heading>
+            <Text textAlign="center" color="gray.600">
+              Deja tus datos para desbloquear un 15% de descuento especial en tu compra.
+            </Text>
+            <form onSubmit={handleSubmit}>
+              <VStack spacing={4} align="stretch">
+                <FormControl isRequired>
+                  <FormLabel>Nombre completo</FormLabel>
+                  <Input
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Correo electrónico</FormLabel>
+                  <Input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Teléfono</FormLabel>
+                  <Input
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                  />
+                </FormControl>
+                <Checkbox
+                  name="acceptPolicy"
+                  isChecked={formData.acceptPolicy}
+                  onChange={handleChange}
+                  colorScheme="teal"
+                >
+                  Acepto la{" "}
+                  <a
+                    href="/privacy-policy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#225059", textDecoration: "underline" }}
+                  >
+                    política de privacidad
+                  </a>
+                  .
+                </Checkbox>
+                <Button
+                  type="submit"
+                  isLoading={loading}
+                  colorScheme="teal"
+                  width="full"
+                >
+                  Enviar y desbloquear descuento
+                </Button>
+              </VStack>
+            </form>
           </VStack>
-        </form>
-      </VStack>
-    </Container>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 
