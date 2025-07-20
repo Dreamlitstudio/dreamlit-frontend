@@ -24,9 +24,9 @@ const LampCard = ({ lamp }: LampCardProps) => {
   const isMobile = useBreakpointValue({ base: true, md: false });
 
   const imageSet: Record<Lamp["name"], string[]> = {
-    Kiki: ["/assets/koala1.png", "/assets/koala2.png", "/assets/koala3.png"],
-    Zaza: ["/assets/leon1.png", "/assets/leon2.png", "/assets/leon3.png"],
-    Nono: ["/assets/perro1.png", "/assets/perro2.png", "/assets/perro3.png"],
+    Kiki: ["/assets/koala1.webp", "/assets/koala2.webp", "/assets/koala3.webp"],
+    Zaza: ["/assets/leon1.webp", "/assets/leon2.webp", "/assets/leon3.webp"],
+    Nono: ["/assets/perro1.webp", "/assets/perro2.webp", "/assets/perro3.webp"],
   };
 
   const images = imageSet[lamp.name];
