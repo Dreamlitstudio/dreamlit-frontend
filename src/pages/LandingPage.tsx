@@ -81,7 +81,7 @@ const LandingPage = () => {
         acceptPolicy: false,
       });
       setTimeout(() => {
-        window.location.href = "/promo-catalog";
+        window.location.href = "/gift";
       }, 1500);
     }
   };
