@@ -49,9 +49,9 @@ const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
 
   return (
     <Box
-      w={{ base: "85%", sm: "85%", md: "85%" }}
-      maxW="280px"
-      h="480px"
+      w={{ base: "100%", sm: "90%", md: "85%" }}
+      maxW={{ base: "320px", md: "280px" }}
+      h={{ base: "auto", md: "480px" }}
       mx="auto"
       border="3px solid #E07A5F"
       borderRadius="lg"
@@ -65,7 +65,7 @@ const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
       position="relative"
     >
       {/* Carrusel */}
-      <Box position="relative" w="100%" h="270px">
+      <Box position="relative" w="100%" h={{ base: "240px", md: "270px" }}>
         <Image
           src={images[index]}
           alt={lamp.name}
@@ -101,8 +101,7 @@ const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
         />
       </Box>
 
-      {/* Info */}
-      <Heading size="md" mt={2} textAlign="center" color="#225059">
+      <Heading size="md" mt={3} textAlign="center" color="#225059">
         {lamp.name}
       </Heading>
       <Badge colorScheme="green" mt={1}>
@@ -133,12 +132,13 @@ const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
       </Text>
 
       <Button
-        mt={3}
+        mt={4}
         color="#225059"
         borderColor="#225059"
         border="1px solid"
         variant="outline"
         _hover={{ bg: "#225059", color: "white" }}
+        size="sm"
         onClick={() =>
           navigate("/customize", {
             state: {

@@ -69,7 +69,7 @@ const LandingPage = () => {
     } else {
       toast({
         title: "¡Datos enviados con éxito!",
-        description: "Gracias por registrarte. Disfruta de tu descuento especial.",
+        description: "Gracias por registrarte. Tu regalo está listo para descargar.",
         status: "success",
         duration: 5000,
         isClosable: true,
@@ -98,10 +98,10 @@ const LandingPage = () => {
         >
           <VStack spacing={6} align="stretch">
             <Heading size="lg" color="#225059" textAlign="center">
-              Acceso Exclusivo 🌟
+              Accede a tu regalo exclusivo 🎁
             </Heading>
             <Text textAlign="center" color="gray.600">
-              Deja tus datos para desbloquear un 15% de descuento especial en tu compra.
+              Queremos agradecerte por elegir un pedacito de magia para tu hogar. Llena este pequeño formulario y desbloquea un regalo especial, creado con cariño por nuestro estudio para ti.
             </Text>
             <form onSubmit={handleSubmit}>
               <VStack spacing={4} align="stretch">
@@ -153,7 +153,7 @@ const LandingPage = () => {
                   colorScheme="teal"
                   width="full"
                 >
-                  Enviar y desbloquear descuento
+                  Descargar mi regalo ✨
                 </Button>
               </VStack>
             </form>

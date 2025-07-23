@@ -24,42 +24,40 @@ const PromoCatalog = () => {
     <Box
       px={{ base: 4, md: 10 }}
       py={10}
-      bgImage="url('/assets/bg-pattern.png')"
-      bgSize="cover"
-      bgRepeat="repeat"
+      bg="#fdfcf9"
       minH="100vh"
     >
-      <VStack spacing={5} textAlign="center" mb={8}>
+      <VStack spacing={5} textAlign="center" mb={8} px={4}>
         <Heading size="lg" color="#225059">
           Catálogo Especial ✨
         </Heading>
-        <Text fontSize="sm" color="gray.600" maxW="600px">
+        <Text fontSize="md" color="gray.600" maxW="600px">
           Gracias por unirte. Disfruta de un 15% de descuento exclusivo.
         </Text>
         <Input
           placeholder="Buscar por nombre..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          width={{ base: "100%", md: "50%" }}
+          width="100%"
+          maxW="400px"
           bg="white"
           color="black"
+          mt={{ base: 2, md: 0 }}
         />
       </VStack>
 
       {filteredLamps.length > 0 ? (
         <Grid
           templateColumns={`repeat(${columns}, 1fr)`}
-          gap={10}
-          mt={2}
-          mb={12}
-          px={2}
+          gap={8}
+          px={{ base: 2, md: 4 }}
         >
           {filteredLamps.map((lamp) => (
             <PromoLampCard key={lamp.name} lamp={lamp} />
           ))}
         </Grid>
       ) : (
-        <Text mt="10" fontSize="xl" color="gray.600">
+        <Text mt="10" fontSize="lg" color="gray.600" textAlign="center">
           ❌ No se encontraron resultados.
         </Text>
       )}
