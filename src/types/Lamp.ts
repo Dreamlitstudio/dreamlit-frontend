@@ -1,6 +1,4 @@
-// src/types/Lamp.ts
-
-export type LampName = "Zaza" | "Kiki" | "Nono";
+export type LampName = "Zuzu" | "Kiki" | "Nono"; // ← Cambio aquí
 
 export interface Lamp {
   id: string;
@@ -10,7 +8,6 @@ export interface Lamp {
   imageUrl: string;
 }
 
-// ✅ Producto completo con personalización y envío
 export interface Product extends Lamp {
   customName: string;
   shippingType: "standard" | "express";
