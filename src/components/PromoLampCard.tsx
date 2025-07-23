@@ -25,17 +25,17 @@ const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
 
   const imageSet: Record<string, string[]> = {
     Kiki: ["/assets/koala1.webp", "/assets/koala2.webp", "/assets/koala3.webp"],
-    Zaza: ["/assets/leon1.webp", "/assets/leon2.webp", "/assets/leon3.webp"],
+    Zuzu: ["/assets/leon1.webp", "/assets/leon2.webp", "/assets/leon3.webp"],
     Nono: ["/assets/perro1.webp", "/assets/perro2.webp", "/assets/perro3.webp"],
   };
 
   const images = imageSet[lamp.name] || [];
-  const discountedPrice = (lamp.price * 0.85).toFixed(0);
+  const discountedPrice = (lamp.price * 0.90).toFixed(0); // 10% de descuento
 
   const description =
     lamp.name === "Kiki"
       ? "Tranquila y soñadora, acompaña cada noche con ternura y dulzura."
-      : lamp.name === "Zaza"
+      : lamp.name === "Zuzu"
       ? "Valiente y aventurera, ilumina los sueños de quienes no temen soñar en grande."
       : "Fiel y cariñoso, es el mejor compañero para soñar sin miedo.";
 
@@ -105,7 +105,7 @@ const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
         {lamp.name}
       </Heading>
       <Badge colorScheme="green" mt={1}>
-        15% Descuento
+        10% Descuento
       </Badge>
 
       <Flex align="center" justify="center" gap={2} mt={2}>
@@ -116,6 +116,10 @@ const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
           ${discountedPrice}
         </Text>
       </Flex>
+
+      <Text fontSize="xs" color="gray.600">
+        Incluye IVA y envío gratis
+      </Text>
 
       <Text
         fontSize="sm"

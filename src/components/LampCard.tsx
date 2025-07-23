@@ -1,4 +1,3 @@
-// src/components/LampCard.tsx
 import {
   Box,
   Image,
@@ -25,7 +24,7 @@ const LampCard = ({ lamp }: LampCardProps) => {
 
   const imageSet: Record<Lamp["name"], string[]> = {
     Kiki: ["/assets/koala1.webp", "/assets/koala2.webp", "/assets/koala3.webp"],
-    Zaza: ["/assets/leon1.webp", "/assets/leon2.webp", "/assets/leon3.webp"],
+    Zuzu: ["/assets/leon1.webp", "/assets/leon2.webp", "/assets/leon3.webp"],
     Nono: ["/assets/perro1.webp", "/assets/perro2.webp", "/assets/perro3.webp"],
   };
 
@@ -43,7 +42,7 @@ const LampCard = ({ lamp }: LampCardProps) => {
   const description =
     lamp.name === "Kiki"
       ? "Tranquila y soñadora, acompaña cada noche con ternura y dulzura."
-      : lamp.name === "Zaza"
+      : lamp.name === "Zuzu"
       ? "Valiente y aventurera, ilumina los sueños de quienes no temen soñar en grande."
       : "Fiel y cariñoso, es el mejor compañero para soñar sin miedo.";
 
@@ -104,6 +103,9 @@ const LampCard = ({ lamp }: LampCardProps) => {
         </Heading>
         <Text fontWeight="bold" color="#225059" fontSize="lg">
           ${lamp.price}
+        </Text>
+        <Text fontSize="xs" color="gray.600">
+          Incluye IVA y envío gratis
         </Text>
         <Text fontSize="sm" color="gray.600" mt={2}>
           {description}
