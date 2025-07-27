@@ -154,8 +154,8 @@ const Customize = () => {
             value={shippingType}
             onChange={(e) => setShippingType(e.target.value as "standard" | "express")}
           >
-            <option value="standard">Estándar (Gratis)</option>
-            <option value="express">Express (+$150 MXN)</option>
+            <option value="standard">Estándar (Gratis – 5 a 7 días hábiles)</option>
+            <option value="express">Express (+$150 MXN – 48 a 72 horas)</option>
           </Select>
         </Box>
         <Divider />
