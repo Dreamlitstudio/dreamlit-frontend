@@ -15,6 +15,7 @@ import GiftPage from "./pages/GiftPage"; // ✅ Nueva página
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import CookieConsent from "./components/CookieConsent"; // ✅ Banner cookies
 
 const App = () => {
   return (
@@ -51,6 +52,7 @@ const App = () => {
           </Routes>
         </main>
         <Footer />
+        <CookieConsent /> {/* ✅ Banner de cookies */}
       </div>
     </Router>
   );

@@ -1,4 +1,3 @@
-// src/pages/PrivacyPolicy.tsx
 import { Box, Heading, Text, VStack } from "@chakra-ui/react";
 
 const PrivacyPolicy = () => {
@@ -29,6 +28,9 @@ const PrivacyPolicy = () => {
         </Text>
         <Text>
           El uso de este sitio y el envío de sus datos personales implica su aceptación de este Aviso de Privacidad.
+        </Text>
+        <Text>
+          Este sitio web utiliza cookies y tecnologías similares para mejorar su experiencia de navegación. Estas cookies no recopilan datos sensibles ni permiten identificarlo personalmente. Al continuar usando nuestro sitio, usted acepta el uso de cookies conforme a esta política.
         </Text>
         <Text>
           Nos reservamos el derecho de realizar modificaciones o actualizaciones al presente aviso en cualquier momento, para la atención de novedades legislativas o políticas internas.
