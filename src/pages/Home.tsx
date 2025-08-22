@@ -22,7 +22,7 @@ import pagaIcon from "../assets/paga-icon.png";
 import newHeroImage from "../assets/principal-good.webp";
 
 const Home = () => {
-  // Si cambias la altura de tu Navbar, ajusta los 80px de la siguiente línea.
+  // Ajusta si tu navbar mide distinto en desktop
   const headerPx = 80;
 
   return (
@@ -31,19 +31,24 @@ const Home = () => {
       <Box
         as="section"
         w="100%"
-        // Ocupa toda la altura visible menos el header para un efecto hero limpio
-        h={{ base: `calc(100svh - ${headerPx}px)`, md: `calc(100svh - ${headerPx}px)` }}
-        minH={{ base: "60svh", md: "70svh" }}
-        maxH="100svh"
+        // En móvil NO forzamos altura de pantalla para evitar “zoom”.
+        // En desktop sí damos efecto hero a pantalla.
+        h={{ base: "auto", md: `calc(100vh - ${headerPx}px)` }}
+        minH={{ base: "unset", md: "70vh" }}
+        maxH={{ base: "unset", md: "100vh" }}
       >
         <Image
           src={newHeroImage}
           alt="Dream Lit Studio - Lámparas personalizadas"
           w="100%"
-          h="100%"
-          objectFit="cover"
+          // En móvil la imagen mantiene proporción y se limita a 75vh para no desbordar.
+          h={{ base: "auto", md: "100%" }}
+          maxH={{ base: "75vh", md: "none" }}
+          objectFit={{ base: "contain", md: "cover" }}
+          objectPosition="center"
           draggable={false}
           loading="eager"
+          display="block" // evita espacios fantasmas en imágenes inline
         />
       </Box>
 
