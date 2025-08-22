@@ -1,3 +1,4 @@
+// src/pages/Checkout.tsx
 import {
   Box,
   Button,
@@ -8,6 +9,7 @@ import {
   FormControl,
   FormLabel,
   useToast,
+  Container,
 } from "@chakra-ui/react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +17,7 @@ import { useState } from "react";
 import { Address } from "../types/Address";
 
 const Checkout = () => {
-  const { cart, clearCart } = useCart();
+  const { cart } = useCart();
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -53,7 +55,14 @@ const Checkout = () => {
       return;
     }
 
-    if (!address.street || !address.number || !address.postalCode || !address.city || !address.state || !address.phone) {
+    if (
+      !address.street ||
+      !address.number ||
+      !address.postalCode ||
+      !address.city ||
+      !address.state ||
+      !address.phone
+    ) {
       toast({
         title: "Dirección incompleta",
         description: "Por favor completa todos los campos de envío.",
@@ -79,20 +88,23 @@ const Checkout = () => {
         shipping_type: item.shippingType,
       }));
 
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/create_preference`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: formattedItems,
-          external_reference,
-          address: {
-            ...address,
-            email,
-            first_name: firstName,
-            last_name: lastName,
-          }
-        }),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/create_preference`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: formattedItems,
+            external_reference,
+            address: {
+              ...address,
+              email,
+              first_name: firstName,
+              last_name: lastName,
+            },
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error en la respuesta: ${response.status}`);
@@ -119,77 +131,135 @@ const Checkout = () => {
 
   if (cart.length === 0) {
     return (
-      <Box p="10" textAlign="center">
-        <Heading size="md">No hay productos en el carrito</Heading>
-        <Button mt="5" onClick={() => navigate("/catalog")}>
-          Volver al catálogo
-        </Button>
+      <Box
+        bg="#FAF3DF" // 👈 Fondo sólido
+        minH="100vh"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        textAlign="center"
+        p={5}
+      >
+        <Box>
+          <Heading size="md" mb={4}>
+            No hay productos en el carrito
+          </Heading>
+          <Button onClick={() => navigate("/catalog")}>Volver al catálogo</Button>
+        </Box>
       </Box>
     );
   }
 
   return (
-    <Box p={{ base: 5, md: 10 }}>
-      <Heading size="lg" mb={5}>Datos de Compra y Envío</Heading>
-      <VStack spacing={4} align="stretch">
+    <Box bg="#FAF3DF" minH="100vh" py={{ base: 6, md: 10 }}>
+      <Container
+        maxW="lg"
+        bg="white"
+        p={{ base: 6, md: 10 }}
+        borderRadius="lg"
+        boxShadow="md"
+      >
+        <Heading size="lg" mb={5} color="#225059" textAlign="center">
+          Datos de Compra y Envío
+        </Heading>
+        <VStack spacing={4} align="stretch">
+          <FormControl isRequired>
+            <FormLabel>Nombre</FormLabel>
+            <Input
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+          </FormControl>
 
-        <FormControl isRequired>
-          <FormLabel>Nombre</FormLabel>
-          <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-        </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Apellido</FormLabel>
+            <Input
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+          </FormControl>
 
-        <FormControl isRequired>
-          <FormLabel>Apellido</FormLabel>
-          <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
-        </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Correo electrónico</FormLabel>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </FormControl>
 
-        <FormControl isRequired>
-          <FormLabel>Correo electrónico</FormLabel>
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Calle</FormLabel>
+            <Input
+              name="street"
+              value={address.street}
+              onChange={handleAddressChange}
+            />
+          </FormControl>
 
-        <FormControl isRequired>
-          <FormLabel>Calle</FormLabel>
-          <Input name="street" value={address.street} onChange={handleAddressChange} />
-        </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Número</FormLabel>
+            <Input
+              name="number"
+              value={address.number}
+              onChange={handleAddressChange}
+            />
+          </FormControl>
 
-        <FormControl isRequired>
-          <FormLabel>Número</FormLabel>
-          <Input name="number" value={address.number} onChange={handleAddressChange} />
-        </FormControl>
+          <FormControl>
+            <FormLabel>Colonia (opcional)</FormLabel>
+            <Input
+              name="neighborhood"
+              value={address.neighborhood}
+              onChange={handleAddressChange}
+            />
+          </FormControl>
 
-        <FormControl>
-          <FormLabel>Colonia (opcional)</FormLabel>
-          <Input name="neighborhood" value={address.neighborhood} onChange={handleAddressChange} />
-        </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Código Postal</FormLabel>
+            <Input
+              name="postalCode"
+              value={address.postalCode}
+              onChange={handleAddressChange}
+            />
+          </FormControl>
 
-        <FormControl isRequired>
-          <FormLabel>Código Postal</FormLabel>
-          <Input name="postalCode" value={address.postalCode} onChange={handleAddressChange} />
-        </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Ciudad</FormLabel>
+            <Input
+              name="city"
+              value={address.city}
+              onChange={handleAddressChange}
+            />
+          </FormControl>
 
-        <FormControl isRequired>
-          <FormLabel>Ciudad</FormLabel>
-          <Input name="city" value={address.city} onChange={handleAddressChange} />
-        </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Estado</FormLabel>
+            <Input
+              name="state"
+              value={address.state}
+              onChange={handleAddressChange}
+            />
+          </FormControl>
 
-        <FormControl isRequired>
-          <FormLabel>Estado</FormLabel>
-          <Input name="state" value={address.state} onChange={handleAddressChange} />
-        </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Teléfono</FormLabel>
+            <Input
+              name="phone"
+              value={address.phone}
+              onChange={handleAddressChange}
+            />
+          </FormControl>
 
-        <FormControl isRequired>
-          <FormLabel>Teléfono</FormLabel>
-          <Input name="phone" value={address.phone} onChange={handleAddressChange} />
-        </FormControl>
+          <Text fontWeight="bold" fontSize="lg" textAlign="right">
+            Total: ${total} MXN
+          </Text>
 
-        <Text fontWeight="bold" fontSize="lg" textAlign="right">Total: ${total} MXN</Text>
-
-        <Button colorScheme="teal" onClick={handlePayment}>
-          Proceder al Pago
-        </Button>
-
-      </VStack>
+          <Button colorScheme="teal" onClick={handlePayment}>
+            Proceder al Pago
+          </Button>
+        </VStack>
+      </Container>
     </Box>
   );
 };
