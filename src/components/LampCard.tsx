@@ -6,11 +6,11 @@ import {
   Heading,
   IconButton,
   useBreakpointValue,
-  Flex,
+  Grid,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { ChevronLeftIcon, ChevronRightIcon, EditIcon } from "@chakra-ui/icons";
 import { Lamp } from "../types/Lamp";
 
 interface LampCardProps {
@@ -30,8 +30,10 @@ const LampCard = ({ lamp }: LampCardProps) => {
   const images = imageSet[lamp.name];
   const [index, setIndex] = useState(0);
 
-  const handlePrev = () => setIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  const handleNext = () => setIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  const handlePrev = () =>
+    setIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  const handleNext = () =>
+    setIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
 
   const description =
     lamp.name === "Kiki"
@@ -42,9 +44,8 @@ const LampCard = ({ lamp }: LampCardProps) => {
 
   return (
     <Box
-      w={{ base: "92%", sm: "85%", md: "300px" }}
-      maxW="100%"
-      aspectRatio={4 / 5}
+      w="100%"
+      maxW="420px"
       mx="auto"
       border="3px solid #225059"
       borderRadius="lg"
@@ -54,70 +55,71 @@ const LampCard = ({ lamp }: LampCardProps) => {
       position="relative"
       display="flex"
       flexDirection="column"
-      overflow="hidden"
+      overflow="visible"
     >
       {/* Carrusel */}
-      <Box position="relative" w="100%" h={{ base: "52%", md: "60%" }} flexShrink={0}>
+      <Box position="relative" w="100%" mb={{ base: 2, md: 3 }}>
         <Image
           src={images[index]}
           alt={lamp.name}
           objectFit="contain"
           w="100%"
-          h="100%"
+          maxH={{ base: "300px", md: "360px" }}
           draggable={false}
         />
 
         <IconButton
-          icon={<ChevronLeftIcon boxSize={{ base: 5, md: 6 }} />}
+          icon={<ChevronLeftIcon boxSize={{ base: 7, md: 9 }} />}  // icono más grande
           aria-label="Anterior"
           onClick={handlePrev}
-          size="sm"
+          size="lg"                                              // botón más grande
           position="absolute"
           top="50%"
           left="2"
           transform="translateY(-50%)"
-          bg="whiteAlpha.700"
-          _hover={{ bg: "whiteAlpha.900" }}
+          bg="whiteAlpha.800"
+          boxShadow="md"
+          _hover={{
+            bg: "whiteAlpha.900",
+            transform: "translateY(-50%) scale(1.1)",
+          }}
           _active={{ bg: "white" }}
           rounded="full"
-          px={2}
         />
         <IconButton
-          icon={<ChevronRightIcon boxSize={{ base: 5, md: 6 }} />}
+          icon={<ChevronRightIcon boxSize={{ base: 7, md: 9 }} />} // icono más grande
           aria-label="Siguiente"
           onClick={handleNext}
-          size="sm"
+          size="lg"
           position="absolute"
           top="50%"
           right="2"
           transform="translateY(-50%)"
-          bg="whiteAlpha.700"
-          _hover={{ bg: "whiteAlpha.900" }}
+          bg="whiteAlpha.800"
+          boxShadow="md"
+          _hover={{
+            bg: "whiteAlpha.900",
+            transform: "translateY(-50%) scale(1.1)",
+          }}
           _active={{ bg: "white" }}
           rounded="full"
-          px={2}
         />
       </Box>
 
       {/* Contenido */}
-      <Flex
-        direction="column"
-        mt={{ base: 2, md: 3 }}
+      <Grid
+        gap={{ base: 1, md: 2 }}
+        gridTemplateRows="auto auto auto auto auto"
         px={{ base: 1, md: 0 }}
-        flex="1"
-        minH={0}   // para permitir clamp
-        minW={0}   // evita overflow horizontal en textos
       >
         <Heading
           as="h3"
-          size={{ base: "sm", md: "md" }}
+          fontSize={{ base: "lg", md: "2xl" }}
           color="#225059"
           textAlign="center"
           lineHeight="short"
-          noOfLines={1}
-          overflowWrap="anywhere"
+          overflowWrap="break-word"
           wordBreak="break-word"
-          minW={0}
         >
           {lamp.name}
         </Heading>
@@ -127,9 +129,6 @@ const LampCard = ({ lamp }: LampCardProps) => {
           color="#225059"
           fontSize={{ base: "md", md: "lg" }}
           textAlign="center"
-          mt={{ base: 1, md: 1 }}
-          noOfLines={1}
-          minW={0}
         >
           ${lamp.price}
         </Text>
@@ -138,8 +137,6 @@ const LampCard = ({ lamp }: LampCardProps) => {
           fontSize={{ base: "xs", md: "sm" }}
           color="gray.600"
           textAlign="center"
-          noOfLines={1}
-          minW={0}
         >
           Incluye IVA y envío gratis
         </Text>
@@ -147,33 +144,33 @@ const LampCard = ({ lamp }: LampCardProps) => {
         <Text
           fontSize={{ base: "xs", md: "sm" }}
           color="gray.600"
-          mt={{ base: 2, md: 2 }}
           textAlign="center"
-          noOfLines={{ base: 3, md: 4 }}
-          overflowWrap="anywhere"
-          wordBreak="break-word"
-          flexGrow={1}
-          minW={0}
         >
           {description}
         </Text>
 
         <Button
-          mt={{ base: 2, md: 3 }}
-          color="#225059"
-          borderColor="#225059"
-          border="1px solid"
-          variant="outline"
-          size={{ base: "sm", md: "sm" }}
-          _hover={{ bg: "#225059", color: "white" }}
+          mt={{ base: 3, md: 3 }}
+          size={{ base: "md", md: "lg" }}
+          leftIcon={<EditIcon />}
+          bg="#225059"
+          color="white"
+          fontWeight="bold"
+          borderRadius="full"
+          _hover={{
+            bg: "#2e6a73",
+            transform: "translateY(-2px)",
+            boxShadow: "lg",
+          }}
+          _active={{ bg: "#1a3c41" }}
+          transition="all 0.2s ease"
           onClick={() => navigate("/customize", { state: { lamp } })}
           w={{ base: "100%", md: "auto" }}
-          alignSelf="center"
-          flexShrink={0}
+          justifySelf="center"
         >
           Personalizar
         </Button>
-      </Flex>
+      </Grid>
     </Box>
   );
 };
