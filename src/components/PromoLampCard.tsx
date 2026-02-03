@@ -6,7 +6,6 @@ import {
   Flex,
   Heading,
   Badge,
-  useBreakpointValue,
   IconButton,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +19,6 @@ interface PromoLampCardProps {
 
 const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
   const navigate = useNavigate();
-  const isMobile = useBreakpointValue({ base: true, md: false });
   const [index, setIndex] = useState(0);
 
   const imageSet: Record<string, string[]> = {
@@ -30,7 +28,7 @@ const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
   };
 
   const images = imageSet[lamp.name] || [];
-  const discountedPrice = (lamp.price * 0.90).toFixed(0); // 10% de descuento
+  const discountedPrice = (lamp.price * 0.9).toFixed(0); // 10% de descuento
 
   const description =
     lamp.name === "Kiki"
@@ -75,6 +73,7 @@ const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
           maxH="100%"
           mx="auto"
         />
+
         <IconButton
           icon={<ChevronLeftIcon boxSize={6} />}
           aria-label="Anterior"
@@ -87,6 +86,7 @@ const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
           size="sm"
           color="#E07A5F"
         />
+
         <IconButton
           icon={<ChevronRightIcon boxSize={6} />}
           aria-label="Siguiente"
@@ -104,6 +104,7 @@ const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
       <Heading size="md" mt={3} textAlign="center" color="#225059">
         {lamp.name}
       </Heading>
+
       <Badge colorScheme="green" mt={1}>
         10% Descuento
       </Badge>
@@ -131,6 +132,7 @@ const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
       >
         {description}
       </Text>
+
       <Text fontSize="xs" color="green.600" mt={1}>
         Promoción exclusiva por tiempo limitado
       </Text>
@@ -148,7 +150,7 @@ const PromoLampCard = ({ lamp }: PromoLampCardProps) => {
             state: {
               lamp: {
                 ...lamp,
-                price: parseInt(discountedPrice),
+                price: parseInt(discountedPrice, 10),
                 isPromo: true,
               },
             },

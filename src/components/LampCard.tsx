@@ -5,7 +5,6 @@ import {
   Button,
   Heading,
   IconButton,
-  useBreakpointValue,
   Grid,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +18,6 @@ interface LampCardProps {
 
 const LampCard = ({ lamp }: LampCardProps) => {
   const navigate = useNavigate();
-  const isMobile = useBreakpointValue({ base: true, md: false });
 
   const imageSet: Record<Lamp["name"], string[]> = {
     Kiki: ["/assets/koala1.webp", "/assets/koala2.webp", "/assets/koala3.webp"],
@@ -69,10 +67,10 @@ const LampCard = ({ lamp }: LampCardProps) => {
         />
 
         <IconButton
-          icon={<ChevronLeftIcon boxSize={{ base: 7, md: 9 }} />}  // icono más grande
+          icon={<ChevronLeftIcon boxSize={{ base: 7, md: 9 }} />}
           aria-label="Anterior"
           onClick={handlePrev}
-          size="lg"                                              // botón más grande
+          size="lg"
           position="absolute"
           top="50%"
           left="2"
@@ -86,8 +84,9 @@ const LampCard = ({ lamp }: LampCardProps) => {
           _active={{ bg: "white" }}
           rounded="full"
         />
+
         <IconButton
-          icon={<ChevronRightIcon boxSize={{ base: 7, md: 9 }} />} // icono más grande
+          icon={<ChevronRightIcon boxSize={{ base: 7, md: 9 }} />}
           aria-label="Siguiente"
           onClick={handleNext}
           size="lg"

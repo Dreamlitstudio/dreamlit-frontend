@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text, Link, Stack, Icon, Flex } from "@chakra-ui/react";
+import { Box, Text, Link, Stack, Icon } from "@chakra-ui/react";
 import { FaInstagram } from "react-icons/fa";
 
 const Footer = () => {
@@ -13,6 +13,7 @@ const Footer = () => {
         textAlign={{ base: "center", md: "left" }}
       >
         <Text fontSize="sm">Hecho en México con amor</Text>
+
         <Link
           href="https://www.instagram.com/dream.lit.studio?igsh=dzBrY2Jwa2NjY3Fs"
           isExternal
