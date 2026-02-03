@@ -22,7 +22,7 @@ import {
   AlertDialogOverlay,
   Flex,
 } from "@chakra-ui/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DeleteIcon } from "@chakra-ui/icons";
 
 interface Order {
@@ -92,7 +92,9 @@ const AdminPanel = () => {
       const data = await response.json();
 
       const sorted: Order[] = Array.isArray(data)
-        ? data.sort((a: Order, b: Order) => (b.created_at > a.created_at ? 1 : -1))
+        ? data.sort((a: Order, b: Order) =>
+            b.created_at > a.created_at ? 1 : -1
+          )
         : [];
 
       setOrders(sorted);
@@ -187,7 +189,14 @@ const AdminPanel = () => {
         alignItems="center"
         justifyContent="center"
       >
-        <Box maxW="400px" w="100%" p={8} boxShadow="md" borderRadius="lg" bg="gray.50">
+        <Box
+          maxW="400px"
+          w="100%"
+          p={8}
+          boxShadow="md"
+          borderRadius="lg"
+          bg="gray.50"
+        >
           <Heading mb={6} size="md" textAlign="center">
             Panel Admin DreamLit
           </Heading>
