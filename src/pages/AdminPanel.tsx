@@ -65,9 +65,6 @@ const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
   { value: "recibido", label: "Recibido" },
 ];
 
-const labelForStatus = (s: OrderStatus) =>
-  STATUS_OPTIONS.find((x) => x.value === s)?.label ?? s;
-
 const AdminPanel = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
@@ -83,7 +80,8 @@ const AdminPanel = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<OrderStatus | "all">("all");
 
-  const ADMIN_PASSWORD = (import.meta.env.VITE_ADMIN_PASSWORD as string) || "";
+  // ✅ CRA (react-scripts) usa REACT_APP_*
+  const ADMIN_PASSWORD = process.env.REACT_APP_ADMIN_PASSWORD || "";
 
   const applyFilters = useCallback(
     (term: string, status: OrderStatus | "all", ordersList: Order[]) => {
@@ -151,7 +149,12 @@ const AdminPanel = () => {
           return updated;
         });
 
-        toast({ title: "Estado actualizado", status: "success", duration: 2000 });
+        toast({
+          title: "Estado actualizado",
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+        });
       } catch (err: any) {
         toast({
           title: "Error",
@@ -178,7 +181,12 @@ const AdminPanel = () => {
         return updated;
       });
 
-      toast({ title: "Orden eliminada", status: "info", duration: 2500 });
+      toast({
+        title: "Orden eliminada",
+        status: "info",
+        duration: 2500,
+        isClosable: true,
+      });
     } catch (err: any) {
       toast({
         title: "Error",
@@ -210,7 +218,6 @@ const AdminPanel = () => {
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
         () => {
-          // refresco simple y confiable
           fetchOrders();
         }
       )
@@ -222,7 +229,10 @@ const AdminPanel = () => {
   }, [authenticated, fetchOrders]);
 
   const totalCount = useMemo(() => orders.length, [orders.length]);
-  const filteredCount = useMemo(() => filteredOrders.length, [filteredOrders.length]);
+  const filteredCount = useMemo(
+    () => filteredOrders.length,
+    [filteredOrders.length]
+  );
 
   const formatAddress = (addr?: ShippingAddress | null) => {
     if (!addr) return "—";
@@ -273,8 +283,8 @@ const AdminPanel = () => {
             onClick={() => {
               if (!ADMIN_PASSWORD) {
                 toast({
-                  title: "Falta configurar VITE_ADMIN_PASSWORD",
-                  description: "Agrega la variable en .env y reinicia el proyecto.",
+                  title: "Falta configurar REACT_APP_ADMIN_PASSWORD",
+                  description: "Agrega la variable en tu .env y reinicia el proyecto.",
                   status: "error",
                   duration: 5000,
                   isClosable: true,
@@ -396,6 +406,7 @@ const AdminPanel = () => {
                 </Td>
               </Tr>
             ))}
+
             {filteredOrders.length === 0 && (
               <Tr>
                 <Td colSpan={6}>
