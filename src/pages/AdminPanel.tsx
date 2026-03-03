@@ -8,6 +8,7 @@ import {
   Th,
   Td,
   Select,
+  Text,
   Spinner,
   Input,
   Button,
@@ -20,8 +21,9 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   Flex,
+  Badge,
 } from "@chakra-ui/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DeleteIcon } from "@chakra-ui/icons";
 import { supabase } from "../lib/supabaseClient";
 
@@ -37,6 +39,14 @@ type ShippingAddress = {
   country?: string;
 };
 
+type OrderItem = {
+  id?: string;
+  title?: string;
+  customName?: string;
+  unit_price?: number | string;
+  quantity?: number | string;
+};
+
 interface Order {
   id: string;
   created_at: string;
@@ -47,7 +57,6 @@ interface Order {
   phone?: string | null;
 
   shipping_address?: ShippingAddress | null;
-
   items: any; // jsonb
   total?: number | null;
 
@@ -56,7 +65,7 @@ interface Order {
   mp_status?: string | null;
   external_reference?: string | null;
 
-  // Fallbacks por si existen columnas “viejas”
+  // compat por si tu tabla también tiene estos campos (no estorban)
   buyer_email?: string | null;
   first_name?: string | null;
   last_name?: string | null;
@@ -77,7 +86,7 @@ const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
 ];
 
 const AdminPanel = () => {
-  const [allOrders, setAllOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -91,41 +100,55 @@ const AdminPanel = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<OrderStatus | "all">("all");
 
-  const ADMIN_PASSWORD = (process.env.REACT_APP_ADMIN_PASSWORD as string) || "";
+  // ✅ CRA env var
+  const ADMIN_PASSWORD =
+    (process.env.REACT_APP_ADMIN_PASSWORD as string) || "";
 
-  const getEmail = (o: Order) =>
-    o.customer_email ?? o.buyer_email ?? "—";
+  const normalizeEmail = (o: Order) =>
+    (o.customer_email ?? o.buyer_email ?? "").toLowerCase();
 
-  const getName = (o: Order) => {
-    if (o.customer_name) return o.customer_name;
-    const full = `${o.first_name ?? ""} ${o.last_name ?? ""}`.trim();
-    return full || "—";
+  const normalizeName = (o: Order) => {
+    const v =
+      o.customer_name ??
+      `${o.first_name ?? ""} ${o.last_name ?? ""}`.trim();
+    return (v ?? "").toLowerCase();
   };
 
-  const formatAddress = (o: Order) => {
-    // Preferido: shipping_address (nuevo)
-    const addr = o.shipping_address;
-    if (addr) {
-      const parts = [
-        [addr.street, addr.number].filter(Boolean).join(" "),
-        addr.neighborhood,
-        [addr.city, addr.state].filter(Boolean).join(", "),
-        addr.postal_code ? `CP: ${addr.postal_code}` : "",
-        addr.country,
-      ].filter(Boolean);
-      return parts.length ? parts.join(" • ") : "—";
+  const safeItemsArray = (items: any): OrderItem[] => {
+    if (!items) return [];
+    if (Array.isArray(items)) return items as OrderItem[];
+    // por si en algún punto llega string
+    if (typeof items === "string") {
+      try {
+        const parsed = JSON.parse(items);
+        return Array.isArray(parsed) ? (parsed as OrderItem[]) : [];
+      } catch {
+        return [];
+      }
     }
+    return [];
+  };
 
-    // Fallback: columnas viejas
-    const parts = [
-      [o.street, o.number].filter(Boolean).join(" "),
-      o.neighborhood ?? undefined,
-      [o.city, o.state].filter(Boolean).join(", "),
-      o.postal_code ? `CP: ${o.postal_code}` : "",
-      o.country ?? undefined,
-    ].filter(Boolean);
+  const formatItemsSummary = (items: any) => {
+    const arr = safeItemsArray(items);
+    if (arr.length === 0) return "—";
 
-    return parts.length ? parts.join(" • ") : "—";
+    return arr
+      .map((it) => {
+        const title = it.title?.trim() || "Producto";
+        const custom = it.customName?.trim() || "Sin personalización";
+
+        const qtyRaw = it.quantity ?? 1;
+        const qty = Number(qtyRaw);
+        const qtyLabel = Number.isFinite(qty) && qty > 1 ? ` x${qty}` : "";
+
+        const priceRaw = it.unit_price;
+        const price = Number(priceRaw);
+        const priceLabel = Number.isFinite(price) ? ` — $${price} MXN` : "";
+
+        return `${title} (${custom})${qtyLabel}${priceLabel}`;
+      })
+      .join("\n");
   };
 
   const applyFilters = useCallback(
@@ -139,9 +162,15 @@ const AdminPanel = () => {
       const cleanTerm = term.trim().toLowerCase();
       if (cleanTerm !== "") {
         filtered = filtered.filter((order) => {
-          const email = getEmail(order).toLowerCase();
-          const name = getName(order).toLowerCase();
-          return email.includes(cleanTerm) || name.includes(cleanTerm);
+          const email = normalizeEmail(order);
+          const name = normalizeName(order);
+          const itemsText = formatItemsSummary(order.items).toLowerCase();
+
+          return (
+            email.includes(cleanTerm) ||
+            name.includes(cleanTerm) ||
+            itemsText.includes(cleanTerm)
+          );
         });
       }
 
@@ -161,7 +190,7 @@ const AdminPanel = () => {
       if (error) throw error;
 
       const list = (data ?? []) as Order[];
-      setAllOrders(list);
+      setOrders(list);
       applyFilters(searchTerm, filterStatus, list);
     } catch (err: any) {
       toast({
@@ -186,7 +215,7 @@ const AdminPanel = () => {
 
         if (error) throw error;
 
-        setAllOrders((prev) => {
+        setOrders((prev) => {
           const updated = prev.map((o) =>
             o.id === id ? { ...o, status: newStatus } : o
           );
@@ -194,7 +223,11 @@ const AdminPanel = () => {
           return updated;
         });
 
-        toast({ title: "Estado actualizado", status: "success", duration: 2000 });
+        toast({
+          title: "Estado actualizado",
+          status: "success",
+          duration: 2000,
+        });
       } catch (err: any) {
         toast({
           title: "Error",
@@ -212,10 +245,13 @@ const AdminPanel = () => {
     if (!deleteId) return;
 
     try {
-      const { error } = await supabase.from("orders").delete().eq("id", deleteId);
+      const { error } = await supabase
+        .from("orders")
+        .delete()
+        .eq("id", deleteId);
       if (error) throw error;
 
-      setAllOrders((prev) => {
+      setOrders((prev) => {
         const updated = prev.filter((o) => o.id !== deleteId);
         applyFilters(searchTerm, filterStatus, updated);
         return updated;
@@ -236,13 +272,12 @@ const AdminPanel = () => {
   }, [applyFilters, deleteId, filterStatus, searchTerm, toast]);
 
   useEffect(() => {
-    if (!authenticated) return;
-    fetchOrders();
+    if (authenticated) fetchOrders();
   }, [authenticated, fetchOrders]);
 
   useEffect(() => {
-    applyFilters(searchTerm, filterStatus, allOrders);
-  }, [applyFilters, filterStatus, allOrders, searchTerm]);
+    applyFilters(searchTerm, filterStatus, orders);
+  }, [applyFilters, filterStatus, orders, searchTerm]);
 
   useEffect(() => {
     if (!authenticated) return;
@@ -262,6 +297,45 @@ const AdminPanel = () => {
       supabase.removeChannel(channel);
     };
   }, [authenticated, fetchOrders]);
+
+  const totalCount = useMemo(() => orders.length, [orders.length]);
+  const filteredCount = useMemo(
+    () => filteredOrders.length,
+    [filteredOrders.length]
+  );
+
+  const formatAddress = (o: Order) => {
+    const addr = o.shipping_address;
+    if (addr) {
+      const parts = [
+        [addr.street, addr.number].filter(Boolean).join(" "),
+        addr.neighborhood,
+        [addr.city, addr.state].filter(Boolean).join(", "),
+        addr.postal_code ? `CP: ${addr.postal_code}` : "",
+        addr.country,
+      ].filter(Boolean);
+      return parts.length ? parts.join(" • ") : "—";
+    }
+
+    // fallback por si tu tabla aún usa columnas planas
+    const parts = [
+      [o.street, o.number].filter(Boolean).join(" "),
+      o.neighborhood,
+      [o.city, o.state].filter(Boolean).join(", "),
+      o.postal_code ? `CP: ${o.postal_code}` : "",
+      o.country,
+    ].filter(Boolean);
+
+    return parts.length ? parts.join(" • ") : "—";
+  };
+
+  const displayEmail = (o: Order) =>
+    o.customer_email ?? o.buyer_email ?? "—";
+
+  const displayName = (o: Order) =>
+    o.customer_name ??
+    `${o.first_name ?? ""} ${o.last_name ?? ""}`.trim() ||
+    "—";
 
   if (!authenticated) {
     return (
@@ -299,8 +373,9 @@ const AdminPanel = () => {
             onClick={() => {
               if (!ADMIN_PASSWORD) {
                 toast({
-                  title: "Falta configurar VITE_ADMIN_PASSWORD",
-                  description: "Agrega la variable en .env y reinicia el proyecto.",
+                  title: "Falta configurar REACT_APP_ADMIN_PASSWORD",
+                  description:
+                    "Agrega la variable en Vercel/.env y vuelve a desplegar.",
                   status: "error",
                   duration: 5000,
                   isClosable: true,
@@ -331,6 +406,7 @@ const AdminPanel = () => {
     return (
       <Box textAlign="center" mt={10} bg="white" minHeight="100vh">
         <Spinner size="xl" />
+        <Text mt={4}>Cargando órdenes...</Text>
       </Box>
     );
   }
@@ -339,17 +415,22 @@ const AdminPanel = () => {
     <Box p={{ base: 4, md: 10 }} bg="white" minHeight="100vh">
       <Flex justify="space-between" align="center" gap={4} flexWrap="wrap" mb={6}>
         <Heading size="lg">Panel de Administración</Heading>
-        <Button size="sm" variant="outline" onClick={fetchOrders}>
-          Refrescar
-        </Button>
+        <Flex gap={2} align="center">
+          <Badge colorScheme="gray">Total: {totalCount}</Badge>
+          <Badge colorScheme="teal">Mostrando: {filteredCount}</Badge>
+          <Button size="sm" variant="outline" onClick={fetchOrders}>
+            Refrescar
+          </Button>
+        </Flex>
       </Flex>
 
+      {/* Filtros */}
       <Flex mb={6} gap={4} flexWrap="wrap">
         <Input
-          placeholder="Buscar por email o nombre"
+          placeholder="Buscar por email, nombre o producto"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          maxW="300px"
+          maxW="340px"
         />
 
         <Select
@@ -366,6 +447,7 @@ const AdminPanel = () => {
         </Select>
       </Flex>
 
+      {/* Tabla */}
       <Box overflowX="auto" boxShadow="md" borderRadius="lg">
         <Table variant="striped" size="sm">
           <Thead bg="gray.100">
@@ -373,6 +455,7 @@ const AdminPanel = () => {
               <Th>Fecha</Th>
               <Th>Email</Th>
               <Th>Nombre</Th>
+              <Th>Productos</Th>
               <Th>Dirección</Th>
               <Th>Estado</Th>
               <Th>Eliminar</Th>
@@ -382,13 +465,24 @@ const AdminPanel = () => {
             {filteredOrders.map((order) => (
               <Tr key={order.id}>
                 <Td>{new Date(order.created_at).toLocaleDateString()}</Td>
-                <Td>{getEmail(order)}</Td>
-                <Td>{getName(order)}</Td>
+                <Td>{displayEmail(order)}</Td>
+                <Td>{displayName(order)}</Td>
+
+                {/* ✅ NUEVA COLUMNA */}
+                <Td whiteSpace="pre-line" fontSize="sm">
+                  {formatItemsSummary(order.items)}
+                </Td>
+
                 <Td fontSize="sm">
                   {formatAddress(order)}
                   <br />
-                  {order.phone ? <span>Tel: {order.phone}</span> : <span>—</span>}
+                  {order.phone ? (
+                    <span>Tel: {order.phone}</span>
+                  ) : (
+                    <span>—</span>
+                  )}
                 </Td>
+
                 <Td>
                   <Select
                     size="sm"
@@ -404,6 +498,7 @@ const AdminPanel = () => {
                     ))}
                   </Select>
                 </Td>
+
                 <Td>
                   <IconButton
                     icon={<DeleteIcon />}
@@ -415,6 +510,16 @@ const AdminPanel = () => {
                 </Td>
               </Tr>
             ))}
+
+            {filteredOrders.length === 0 && (
+              <Tr>
+                <Td colSpan={7}>
+                  <Text p={4} color="gray.500">
+                    No hay órdenes que coincidan con los filtros actuales.
+                  </Text>
+                </Td>
+              </Tr>
+            )}
           </Tbody>
         </Table>
       </Box>
