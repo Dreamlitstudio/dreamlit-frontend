@@ -91,7 +91,7 @@ const AdminPanel = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<OrderStatus | "all">("all");
 
-  const ADMIN_PASSWORD = (import.meta.env.VITE_ADMIN_PASSWORD as string) || "";
+  const ADMIN_PASSWORD = (process.env.REACT_APP_ADMIN_PASSWORD as string) || "";
 
   const getEmail = (o: Order) =>
     o.customer_email ?? o.buyer_email ?? "—";
