@@ -79,7 +79,7 @@ const AdminPanel = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<OrderStatus | "all">("all");
 
-  const ADMIN_PASSWORD = (import.meta.env.VITE_ADMIN_PASSWORD as string) || "";
+  const ADMIN_PASSWORD = (process.env.REACT_APP_ADMIN_PASSWORD as string) || "";
 
   const applyFilters = useCallback(
     (term: string, status: OrderStatus | "all", list: Order[]) => {
