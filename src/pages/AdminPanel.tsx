@@ -101,23 +101,11 @@ const AdminPanel = () => {
   const [filterStatus, setFilterStatus] = useState<OrderStatus | "all">("all");
 
   // ✅ CRA env var
-  const ADMIN_PASSWORD =
-    (process.env.REACT_APP_ADMIN_PASSWORD as string) || "";
-
-  const normalizeEmail = (o: Order) =>
-    (o.customer_email ?? o.buyer_email ?? "").toLowerCase();
-
-  const normalizeName = (o: Order) => {
-    const v =
-      o.customer_name ??
-      `${o.first_name ?? ""} ${o.last_name ?? ""}`.trim();
-    return (v ?? "").toLowerCase();
-  };
+  const ADMIN_PASSWORD = (process.env.REACT_APP_ADMIN_PASSWORD as string) || "";
 
   const safeItemsArray = (items: any): OrderItem[] => {
     if (!items) return [];
     if (Array.isArray(items)) return items as OrderItem[];
-    // por si en algún punto llega string
     if (typeof items === "string") {
       try {
         const parsed = JSON.parse(items);
@@ -149,6 +137,58 @@ const AdminPanel = () => {
         return `${title} (${custom})${qtyLabel}${priceLabel}`;
       })
       .join("\n");
+  };
+
+  const normalizeEmail = (o: Order) =>
+    (o.customer_email ?? o.buyer_email ?? "").toLowerCase();
+
+  const normalizeName = (o: Order) => {
+    const cn = (o.customer_name ?? "").trim();
+    if (cn) return cn.toLowerCase();
+
+    const fn = (o.first_name ?? "").trim();
+    const ln = (o.last_name ?? "").trim();
+    const full = `${fn} ${ln}`.trim();
+    return full.toLowerCase();
+  };
+
+  const displayEmail = (o: Order) => {
+    const email = o.customer_email ?? o.buyer_email ?? "";
+    return email.trim() ? email : "—";
+  };
+
+  const displayName = (o: Order) => {
+    const cn = (o.customer_name ?? "").trim();
+    if (cn) return cn;
+
+    const fn = (o.first_name ?? "").trim();
+    const ln = (o.last_name ?? "").trim();
+    const full = `${fn} ${ln}`.trim();
+    return full ? full : "—";
+  };
+
+  const formatAddress = (o: Order) => {
+    const addr = o.shipping_address;
+    if (addr) {
+      const parts = [
+        [addr.street, addr.number].filter(Boolean).join(" "),
+        addr.neighborhood,
+        [addr.city, addr.state].filter(Boolean).join(", "),
+        addr.postal_code ? `CP: ${addr.postal_code}` : "",
+        addr.country,
+      ].filter(Boolean);
+      return parts.length ? parts.join(" • ") : "—";
+    }
+
+    const parts = [
+      [o.street, o.number].filter(Boolean).join(" "),
+      o.neighborhood,
+      [o.city, o.state].filter(Boolean).join(", "),
+      o.postal_code ? `CP: ${o.postal_code}` : "",
+      o.country,
+    ].filter(Boolean);
+
+    return parts.length ? parts.join(" • ") : "—";
   };
 
   const applyFilters = useCallback(
@@ -245,10 +285,7 @@ const AdminPanel = () => {
     if (!deleteId) return;
 
     try {
-      const { error } = await supabase
-        .from("orders")
-        .delete()
-        .eq("id", deleteId);
+      const { error } = await supabase.from("orders").delete().eq("id", deleteId);
       if (error) throw error;
 
       setOrders((prev) => {
@@ -279,6 +316,7 @@ const AdminPanel = () => {
     applyFilters(searchTerm, filterStatus, orders);
   }, [applyFilters, filterStatus, orders, searchTerm]);
 
+  // (Opcional) Realtime: cuando haya inserts/updates/deletes, refresca la lista
   useEffect(() => {
     if (!authenticated) return;
 
@@ -303,39 +341,6 @@ const AdminPanel = () => {
     () => filteredOrders.length,
     [filteredOrders.length]
   );
-
-  const formatAddress = (o: Order) => {
-    const addr = o.shipping_address;
-    if (addr) {
-      const parts = [
-        [addr.street, addr.number].filter(Boolean).join(" "),
-        addr.neighborhood,
-        [addr.city, addr.state].filter(Boolean).join(", "),
-        addr.postal_code ? `CP: ${addr.postal_code}` : "",
-        addr.country,
-      ].filter(Boolean);
-      return parts.length ? parts.join(" • ") : "—";
-    }
-
-    // fallback por si tu tabla aún usa columnas planas
-    const parts = [
-      [o.street, o.number].filter(Boolean).join(" "),
-      o.neighborhood,
-      [o.city, o.state].filter(Boolean).join(", "),
-      o.postal_code ? `CP: ${o.postal_code}` : "",
-      o.country,
-    ].filter(Boolean);
-
-    return parts.length ? parts.join(" • ") : "—";
-  };
-
-  const displayEmail = (o: Order) =>
-    o.customer_email ?? o.buyer_email ?? "—";
-
-  const displayName = (o: Order) =>
-    o.customer_name ??
-    `${o.first_name ?? ""} ${o.last_name ?? ""}`.trim() ||
-    "—";
 
   if (!authenticated) {
     return (
@@ -476,11 +481,7 @@ const AdminPanel = () => {
                 <Td fontSize="sm">
                   {formatAddress(order)}
                   <br />
-                  {order.phone ? (
-                    <span>Tel: {order.phone}</span>
-                  ) : (
-                    <span>—</span>
-                  )}
+                  {order.phone ? <span>Tel: {order.phone}</span> : <span>—</span>}
                 </Td>
 
                 <Td>
